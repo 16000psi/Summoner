@@ -3,15 +3,15 @@ import inquirer from 'inquirer';
 
 ////  UTILITIES
 
-let debugMode = true // flag which turns debug mode on and off.  Debug mode settings are below. Can be set on title menu buy entering 'debug'
+let debugMode = false // flag which turns debug mode on and off.  Debug mode settings are below. Can be set on title menu buy entering 'debug'
 
 
 const debugModePreservesConsole = false // If debug mode prints something instead of clearing the console
 const debugModePrintDemonIDs = false // If debug mode and console preserve enabled, prints Demon IDs instead of clearing console
-const debugModePrintEnemyPP = true // If debug mode prints PP of enemy moves 
+const debugModePrintEnemyPP = false // If debug mode prints PP of enemy moves 
 const debugModeChangesInventory = true  // if debug mode uses premade Demon inventory instead of empty one
 const debugModeChangesEnemyInventory = true  // if debug mode uses premade enemy Demon inventory instead of empty one
-const debugModeLaunchBattle = true // if debug mode launches battle on player turn rather than intro page
+const debugModeLaunchBattle = false // if debug mode launches battle on player turn rather than intro page
 const debugModeLaunchEnemyTurn = false // if debug mode launches enemy turn 
 const debugModeAttacksAlwaysMiss = false  // If debug mode all attacks miss or are resisted
 const debugModeNoAttacksAvailable = false // If debug mode no attacks will be available and only option will be punch self in face
@@ -19,6 +19,8 @@ const debugModeAllAttacksFatalForDefender = false // If debug mode every success
 const debugModeAllAttacksFatalForAttacker = false // If debug mode every successful attack will kill the attacker
 const debugModeAlwaysEnemyTurn = false // If debug mode then every combat turn will be for the enemy
 const debugModeAlwaysPlayerTurn = false  // If debug mode then every combat turn will be for the player
+const debugModeGodMode = true // if debug mode gives player demons 10000 stats in battle
+const debugModeBonusXP = 0 // if debugmode gives this ammount of xp extra after battle 
 
 // Global variables for preventing spelling mistakes
 
@@ -41,7 +43,7 @@ function consoleClear(GS){    /// Function to be used instead of console.clear w
         console.clear()
     } else if (debugModePreservesConsole === true && debugModePrintDemonIDs === false && debugModePrintEnemyPP === false) {
         console.log("")
-        console.log(str)
+        console.log("")
         console.log("")
     }
 
@@ -128,28 +130,308 @@ function introPage (GS) {    // introPage
 }
 
 function mainMenu (GS) {
+
+
     consoleClear(GS)
+
+    console.log("-        SUMMONER        -")
+    console.log("")
+    console.log(`${GS.playerName}    Soul Energy: ${GS.soulEnergy}`)
+    console.log("")
+    console.log(`Day ${GS.day}                    ${timeOfDay(GS)}`)
+    console.log("")
+
+
+
+    let menuMessage = ""
+
+
+    /// Following bit determines if sleep is available and sets menu message accordingly.
+
+    let sleepAvailable = false
+
+
+    if (GS.time >= 5 && GS.time < 7) {
+
+        sleepAvailable = true
+        menuMessage = "It is getting late.\nTo view your Demons, enter A. To sleep, enter S"
+        
+    } 
+
+    else if (GS.time >= 7) {
+        sleepAvailable = true
+
+        menuMessage = "You are falling asleep where you stand.\nTo view your Demons, enter A. To sleep, enter S"
+    }
+
+    else if (GS.time < 5) {
+        sleepAvailable = false
+        menuMessage = "To view your Demons, enter A."
+    }
+
+    ///
+
+
     inquirer
     .prompt([
         {
             name: "mainMenu",
-            message: "MAIN MENU press A"
+            message: menuMessage
 
         },
     ])
     .then ( answers  => {
 
-        consoleClear(answers)
+        consoleClear(GS)
         
-        if (answers.mainMenu.toUpperCase() === "A") {
+
+
+        if (answers.mainMenu.toUpperCase() === "A") {  // view demon menu
             demonInventory(GS)
             demonInventoryMenu (GS)
 
-        } else {
+        }
+
+        else if (answers.mainMenu.toUpperCase() === "S") {  // go to sleep
+
+            if (sleepAvailable) {   // if correct time of day, initiate sleep
+
+                sleepInitiated(GS)
+            }
+
+            else if (!(sleepAvailable)) {   // if it's not, just reload the main menu
+
+                mainMenu(GS)
+            }
+        }
+
+        else if (answers.mainMenu.toUpperCase() === "WAIT") {  // if debugmode enabled, player can wait 3 hours by entering wait
+
+            if (debugMode) {
+
+                GS.time += 1
+                mainMenu(GS)
+            }
+            else if (!(debugMode)) {
+
+                mainMenu(GS)
+            }
+        }
+        
+        else if                                                              // invalid input
+        (answers.mainMenu.toUpperCase() !== "A" &&
+        answers.mainMenu.toUpperCase() !== "S"
+        ) 
+        {
             mainMenu(GS)
         }
     })
 }
+
+//// Time and Sleep functions
+
+function timeOfDay (GS) {  // takes time number 0-7 and returns a "xpm" string from 6am to 3am.
+
+    let t = GS.time
+
+    if (t > 7) {  // sets time to 7 / 3am if it's somehow bigger than that
+        t = 7
+    }
+
+    switch (t) {
+        case 0:
+            return "6am"
+        case 1:
+            return "9am"
+        case 2:
+            return "12pm"
+        case 3:
+            return "3pm"
+        case 4:
+            return "6pm"
+        case 5:
+            return "9pm"
+        case 6:
+            return "12am"
+        case 7:
+            return "3am"
+
+    }
+
+    
+}
+
+function calculateWakeUpTime (GS) { // sets the waking up time based on when the player went to bad with chances of sleeping in
+
+    if (GS.time > 7) {  // sets time to 7 / 3am if for some reason it's bigger than that
+        GS.time = 7
+    }
+
+    GS.time -= 5
+
+    let sleepIn = Math.round(Math.random()) 
+    let sleepInLate = Math.round(Math.random())
+
+    if (GS.time === 2) {  // if user went to bed at 3 am
+
+        if (sleepIn && sleepInLate) {  // 25% chance of getting up at 3pm
+            GS.time = 3
+        }
+        else if (sleepIn || sleepInLate) {   // 50% chance of getting up at 12pm
+            GS.time = 2
+        }
+        else {                        // 25% chance of getting up at 9am
+            GS.time = 1
+        }
+
+    }
+
+    else if (GS.time === 1) {  // if user went to bed at 12 am
+
+        if (Math.random() > 0.9) {  // 10% chance of getting up at 12. If this random roll fails then there is a ...
+            GS.time = 2
+        }
+
+        else if (sleepIn || sleepInLate) {  // 75% chance of getting up at 9am
+            GS.time = 1
+        }
+        else {                        // 25% chance of getting up at 6am
+            GS.time = 0
+        }
+
+
+    }
+
+
+
+}
+
+function sleepInitiated (GS) { // enter to continue that displays when player decides to go to sleep.  
+
+    consoleClear(GS)
+
+    console.log("")
+    console.log("You enter your bedchamber to try and get some sleep.")
+    console.log("")
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "sleepInitiated",
+            message: "Enter to continue..."
+        }
+    ])
+    .then (answers => {
+        
+        if (answers.sleepInitiated === "") {
+
+            sleeping (GS)
+
+        }
+        else if (answers.sleepInitiated !== "") {
+            sleepInitiated(GS)
+        }
+    })
+}
+
+function sleeping (GS) {  // Displays dreams / nigthmares.  Also advances day.    UNFINISHED
+
+
+    let sleepString = "PLACEHOLDER SLEEP STRING "
+
+    consoleClear(GS)
+
+    console.log("")
+    console.log(sleepString)
+    console.log("")
+
+    inquirer
+    .prompt ([
+        {
+            name: "sleeping",
+            message: "Enter to continue..."
+        }
+    ])
+    .then (answers => {
+
+        if (answers.sleeping === "") {
+
+            calculateWakeUpTime(GS)  
+
+            GS.day += 1       // advances the day
+
+            morningMessage(GS)
+
+
+        }
+
+        else if (answers.sleeping !== "") {
+
+            sleeping(GS)
+        }
+
+
+    })
+}
+
+function morningMessage (GS) {  // Continue and message that gets displayed indicating when the player woke up
+
+    consoleClear(GS)
+
+    let awakenText = "Wow, what a night!  morningMessage() says : 'I'm broken.  Somthing isnt setting the time of day correctly.'"
+    let message = "This isn't right either!!"
+
+    if (GS.time === 3) {
+        awakenText = "You manage to drag yourself from your chambers mid-afternoon, after sleeping-in spectacularly."
+        message = "What a pitty. "
+    }
+    else if (GS.time === 2) {
+        awakenText = "You awake from whatever type of slumber you were having at midday, get dressed hurriedly and leave your bedroom."
+        message = ""
+    }
+    else if (GS.time === 1) {
+        awakenText = "You get up and dress yourself after your night's rest."
+        message = ""
+    }
+    else if (GS.time === 0) {
+        awakenText = "You awake bright and early."
+        message = "The day is young. "
+    }
+
+    console.log("")
+    console.log(awakenText)
+    console.log("")
+
+    message = message + "Enter to continue..."
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "morningMessage",
+            message: message
+        }
+    ])
+    .then (answers => {
+
+        if (answers.morningMessage === "") {
+
+            mainMenu(GS)
+
+
+
+        }
+        else if (answers.morningMessage !== "") {
+            morningMessage(GS)
+        }
+    })
+
+
+
+}
+
+
 
 
 
@@ -159,12 +441,12 @@ function demonInventoryMenu  (GS) { // Selection menu logic for Demon inventory
     inquirer
     .prompt([
         {
-            name: "demonInventoryMenu ",
+            name: "demonInventoryMenu",
             message: "Input 1-6 to view Demon. A to change active Demon. S to swap Demon positions. X to exit"
         }
     ])
     .then ( answers => {             
-        if (answers.demonInventoryMenu .toUpperCase() === "X") {     // exit to main menu
+        if (answers.demonInventoryMenu.toUpperCase() === "X") {     // exit to main menu
 
             mainMenu(GS)
 
@@ -388,7 +670,21 @@ function activeDemonChanger(GS) { // interface and logic for changing the active
 
 
 
-            if (demonPressenceTester(GS, answers.activeDemonChanger)){   // If Demon in slot, execute change active code
+            let selectionIndex = (parseInt(selection) - 1)  // changes selection index to 0 indexing
+
+
+            if (demonPressenceTester(GS, answers.activeDemonChanger) && GS.pWI[selectionIndex].hP === 0) {  // if demon has no health:
+
+                consoleClear(GS)
+                demonInventory(GS)
+                console.log("Demon is too weak to be able to fight.")
+                activeDemonChanger(GS)   // launches active changer interface
+
+            }
+
+
+
+            else if (demonPressenceTester(GS, answers.activeDemonChanger)){   // If Demon in slot, execute change active code
 
                 for (let i in GS.pWI) {                             // erases active stance from all Demon
                     if (Object.keys(GS.pWI[i]).length === 0) {
@@ -398,7 +694,7 @@ function activeDemonChanger(GS) { // interface and logic for changing the active
                     }
                 }
     
-                let selectionIndex = (parseInt(selection) - 1)  // changes selection index to 0 indexing
+                
 
                 GS.pWI[selectionIndex].active = true             // change selected to active
 
@@ -563,9 +859,31 @@ function swapDemon (GS) { // menu and logic for swapping Demon
 
 //////////// Battle Functions
  
-function battleIntro (GS) { // Intro splash to battle mode with logic for extracting messages and names from enemy WM / lone Demon
+function battleIntro (GS) { // Intro splash to battle mode with logic for extracting messages and names from enemy WM / lone Demon  // also initialises stats
 
     initialStats(GS)   // Creates an array containing the stats of each demon going into the battle [str,agi,def,pow] in order to be reset at the end (to stop debuffs / buffs being permantent)
+
+
+    if (debugMode === true && debugModeGodMode === true) {  // makes demon godlike if debug mode and god mode on
+
+        for (let i in Object.keys(GS.pWI)) {
+
+            if ( Object.keys(GS.pWI[i]).length > 0) {
+
+                GS.pWI[i].str = 10000
+                GS.pWI[i].agi = 10000
+                GS.pWI[i].def = 10000
+                GS.pWI[i].pow = 10000
+            }
+        }
+
+
+
+
+
+    }
+
+    
 
 
 
@@ -2438,7 +2756,7 @@ function demonDiedMenu (GS, attacker, defender, whoseTurnIsIt) {
 
                     break;
 
-                case "battle won":  // to finish 
+                case "battle won":   
 
                     reinitialiseStats(GS)
 
@@ -2460,10 +2778,12 @@ function demonDiedMenu (GS, attacker, defender, whoseTurnIsIt) {
 
                     break;
 
-                case "both Demon dead, battle won":  // to finish 
+                case "both Demon dead, battle won":  
 
                     reinitialiseStats(GS)
-                    console.log("both Demon dead, battle won")
+
+                    autoPickActiveDemon(GS.pWI)
+
 
                     battleWon(GS, xPDistributor(GS))
 
@@ -2561,7 +2881,7 @@ function battleLost (GS) {
     console.log ("You have lost the battle")
 }
 
-function battleWon (GS, xpDistributionArray) {
+function battleWon (GS, xpDistributionArray) {  // streen taken to when battle won
 
 
 
@@ -2615,8 +2935,12 @@ function xPDistributor (GS) {  // calculates xp to award each wokemon returning 
 
         if (Object.keys(GS.enemy.eWI[i]).length > 0) {
 
-            xPTotal += (GS.enemy.eWI[i].level * 5) + 20      // FORMULA FOR TOTAL XP PER WOKEMON IN EWI
+            xPTotal += (GS.enemy.eWI[i].level * 5) + 20    // FORMULA FOR TOTAL XP PER WOKEMON IN EWI
         }
+    }
+
+    if (debugMode === true && debugModeBonusXP > 0) {  // if debug mode adds xp to total from relevant setting
+        xPTotal += debugModeBonusXP
     }
 
     for (let i in GS.pWI) {           // Adds up the number of total attacks done by all player demons
@@ -2641,7 +2965,7 @@ function xPDistributor (GS) {  // calculates xp to award each wokemon returning 
     return result  // returns array as xp per demon in slot as in [323, 0, 0, 32, 63636, 0]
 }
 
-function xPDistributorMenu (GS, xpDistributionArray) {
+function xPDistributorMenu (GS, xpDistributionArray) {  // lists demons xp gain and continue.  If level up occurs goes to tha level up menu UNFINISHED
 
     consoleClear(GS)
 
@@ -2659,7 +2983,281 @@ function xPDistributorMenu (GS, xpDistributionArray) {
 
     console.log("")
 
+    inquirer
+    .prompt
+    ([ 
+        {
+            name: "xPDistributorMenu",
+            message: "Press Enter to continue..."
+        }
+    ])
+    .then (answers => {
+
+        if (answers.xPDistributorMenu === "") {
+
+            let levelsGainedArray = xPDistributoraApplier (GS, xpDistributionArray)  // applies gained xp and sees if any demon leveled up
+
+            let levelUpFlag = false
+
+            for (let i in levelsGainedArray) {
+
+                
+
+                if (levelsGainedArray[i] > 0) {
+
+                    levelUpFlag = true
+
+                    
+                }
+
+                
+            }
+            if (levelUpFlag === true) {
+
+                levelUpMenu(GS, levelsGainedArray)
+            }
+
+            else {
+
+                soulEnergyMenu(soulEnergyCalculator (GS))
+            }
+
+
+
+
+        }
+
+        else if (answers.xPDistributorMenu !== "") {
+
+            xPDistributorMenu (GS, xpDistributionArray)
+        }
+    })
+
 }
+
+function xPDistributoraApplier (GS, xpDistributionArray) {  // logic for leveling up wokemon as well as xp table. returns array of 6 containing no of times each wokemon levelled up
+
+    let levelsGainedArray = [0,0,0,0,0,0]
+
+    let levelsAndXP = [[0, 0], [1 , 100],[2 , 225],[3 , 350],[4 , 500],[5 , 700],[6 , 950],[7 , 1250],[8 , 1675],[9 , 2100],[10 , 2600],
+                       [11 , 3200],[12 , 4000],[13 , 5000],[14 , 6200],[15 , 7500],[16 , 8100],[17 , 9700],[18 , 11700],[19 , 14000],[20 , 17000],
+                       [21 , 21000],[22 , 25000],[23 , 30000],[24 , 33000],[25 , 37000],[26 , 42000],[27 , 45000],[28 , 50000],[29 , 60000],[30 , Infinity], ]
+
+    for (let i in xpDistributionArray) {
+
+
+        if (Object.keys(GS.pWI[i]).length > 0) {
+
+            GS.pWI[i].xp += xpDistributionArray[i]          // gives xp to ech demon
+
+            let demonLevel = GS.pWI[i].level
+
+            if (GS.pWI[i].xp > levelsAndXP[demonLevel][1]){    // if demon xp greater than what levelsAndXp says is required for the current level (level up ammount)
+
+                for (let j in levelsAndXP) {    // for every level in levelsandxp 
+
+                    if (demonLevel=== levelsAndXP[j][0] && GS.pWI[i].xp > levelsAndXP[j][1]) {   // check if current xp is over that required to advance
+
+                        levelsGainedArray[i] ++   // adds level to relevant slot in output array
+
+                        GS.pWI[i].xp -= levelsAndXP[demonLevel][1]    // roll over xp to next level (remove xp required for current level up from xp)
+
+                        GS.pWI[i].level ++
+                        
+                        demonLevel ++
+
+        
+                    }
+                }
+
+
+
+            }  
+        }
+    }
+
+    return levelsGainedArray
+
+
+
+
+
+}
+
+function levelUpMenu (GS, levelsGainedArray) {  // menu for if something levelled up
+
+    consoleClear(GS)
+    console.log("")
+
+    for (let i in levelsGainedArray) {
+
+        if (levelsGainedArray[i] > 0 && Object.keys(GS.pWI[i]).length > 0) {
+
+            console.log(`${demonName(GS.pWI[i])} has risen to level ${GS.pWI[i].level}.`)
+        }
+    }
+    console.log("")
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "levelUpMenu",
+            message: "Press Enter to continue..."
+        }
+    ])
+    .then (answers => {
+
+        if (answers.levelUpMenu === "") {
+
+            let isevolution = (evolvedTester(GS, levelsGainedArray))   // checks if an evolution has occurred
+
+            console.log(isevolution)
+
+            if (isevolution) {   // if evolution did occurr go to that menu
+
+                evolvedMenu(GS, levelsGainedArray)
+                
+                
+
+            }
+
+
+            else if (!(isevolution)){   // if not just progress to thing that happens after battle is won
+                
+                
+                soulEnergyMenu(GS, soulEnergyCalculator(GS))
+            }
+
+
+
+        }
+
+        else if (answers.levelUpMenu !== "") {
+
+            levelUpMenu(GS, levelsGainedArray)
+        }
+    })
+
+    
+}
+
+function evolvedTester (GS, levelsGainedArray) { // if level up has occurred returns boolean for if a demon evolved (level became >= 10 or >= 20)
+
+    /* formula is basically take current level, get the remainder from dividing by 10.
+        if the levels gained is greater than that then we know that the demon must have levelled greater than that.
+
+        In almost all cases this should be levels gained 1.  Level is 10 or 20, so remainder 10 is zero.  1 is greater than zero so evolved true.
+        In cases where no evolution, e.g. levels gained is 1 and level is 15, 1 will not be  greater than the remainder so this flag will be false.
+
+        Also need to not let this return true if the demon is level 30 (no evolution at that level)
+
+    */
+
+    for (let i in levelsGainedArray) {
+
+        if (levelsGainedArray[i] > 0 && Object.keys(GS.pWI[i].length > 0) && GS.pWI[i].level !== 30) {
+
+            let levelsOverX0 = (GS.pWI[i].level % 10)  // levels over a multiple of 10
+            let gained = levelsGainedArray[i]              // levels gained from the battle
+
+            if (gained > levelsOverX0) {
+                return true
+            }
+
+            
+        }
+    }
+    return false
+}
+
+function evolvedMenu (GS, levelsGainedArray) { // UNFINISHED
+
+    consoleClear(GS)
+    console.log("")
+    console.log("PLACEHOLDER FOR EVOLUTION MENU")
+    console.log("")
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "evolvedMenu",
+            message: "Press Enter to continue..."
+        }
+    ])
+
+    .then (answers => {
+
+        if (answers.evolvedMenu === "") {
+
+            soulEnergyMenu(GS, soulEnergyCalculator(GS))
+
+
+        }
+
+        else if (answers.evolvedMenu !== "") {
+
+            evolvedMenu(GS, levelsGainedArray)
+        }
+    })
+}
+
+function soulEnergyCalculator (GS) { // Calculated the ammount of soul energy the player gains from the battle
+
+    let result = 0
+
+
+    for (let i in GS.enemy.eWI) {
+
+        if (Object.keys(GS.enemy.eWI[i]).length > 0) {
+
+            result += (GS.enemy.eWI[i].level * 2) + 5    // FORMULA FOR TOTAL MONEY PER DEMON IN EWI
+        }
+    }
+
+    result += GS.enemy.enemyBonusSoulEnergy // adds bonus soul energy coming from named summoners
+
+
+
+
+    return result  // returns soulEnergy
+
+}
+
+function soulEnergyMenu (GS, soulEnergyAmmount) { // Displays the soul energy gained from battle (also will contain other things) -- UNFINISHED
+
+    consoleClear(GS)
+
+    console.log("")
+    console.log(`You have gained ${soulEnergyAmmount} Soul Energy from vanquishing you opponent.`)
+    console.log("")
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "soulEnergyMenu",
+            message: "Press Enter to continue..."
+        }
+    ])
+    .then (answers => {
+        if (answers.soulEnergyMenu === "") {  // ADD END OF BATTLE WON THINGS HERE e.g. time of day change, story point increase
+
+            GS.soulEnergy += soulEnergyAmmount  // updated player soul energy with ammount gained from battle
+
+            mainMenu(GS)
+
+
+        }
+        else if (answers.soulEnergyMenu !== "") {
+
+            soulEnergyMenu(GS, soulEnergyAmmount)
+        }
+    })
+}
+
+
 
 
 
@@ -2825,6 +3423,8 @@ function iDGenerator (iDList) {  // generates a new ID for every Demon BUT I've 
 
 //////////// Data Zone 
 
+let day = 1
+let time = 6
 let playerName = "hard drive bastard"
 let enemyName = "Evil Bastard"
 let enemyIntroMessage = "none"
@@ -2832,6 +3432,8 @@ let enemyDefeatMessage = "none"
 let pWI = []   // player Demon inventory
 let items = []
 let enemy = {}   // enemy Demon inventory
+let soulEnergy = 0
+let enemyBonusSoulEnergy = 0
 
 
 //// Move repository (probs import this later for tidiness)
@@ -2861,7 +3463,7 @@ const MOVES = {
         mode: "physical",
         baseDamageMod: 1.4,
         selfDamageMod: 0.02,
-        selfEffect: "all 0",
+        selfEffect: "none",
         enemyEffect: "none",
         maxPP: 10,
         message: "ATTACKER tackles DEFENDER to the ground!"
@@ -2896,9 +3498,9 @@ if ((debugMode) && (debugModeChangesInventory)) { // Sets Demon inventory.  Debu
             genus: "brute",
             species: "brawler",
             maxHP: 456,
-            hP: 400,
-            level: 12,
-            xp: 4564,
+            hP: 456,
+            level: 1,
+            xp: 0,
             str: 34,
             agi: 54,
             def: 32,
@@ -2921,8 +3523,8 @@ if ((debugMode) && (debugModeChangesInventory)) { // Sets Demon inventory.  Debu
             species: "patrician",
             maxHP: 456,
             hP: 456,
-            level: 21,
-            xp: 12034,
+            level: 1,
+            xp: 0,
             str: 20,
             agi: 40,
             def: 32,
@@ -2959,6 +3561,7 @@ if ((debugMode) && (debugModeChangesEnemyInventory)) { // If change enemy inv de
     
 
     enemy = {
+        enemyBonusSoulEnergy: enemyBonusSoulEnergy,
         enemyName : enemyName,
         enemyIntroMessage : enemyIntroMessage,
         enemyDefeatMessage : enemyDefeatMessage,
@@ -2971,7 +3574,7 @@ if ((debugMode) && (debugModeChangesEnemyInventory)) { // If change enemy inv de
                 genus: "brute",
                 species: "brawler",
                 maxHP: 456,
-                hP: 1,
+                hP: 456,
                 level: 12,
                 xp: 4564,
                 str: 34,
@@ -2996,8 +3599,8 @@ if ((debugMode) && (debugModeChangesEnemyInventory)) { // If change enemy inv de
                 genus: "cultured",
                 species: "patrician",
                 maxHP: 456,
-                hP: 30,
-                level: 21,
+                hP: 0,
+                level: 22,
                 xp: 12034,
                 str: 20,
                 agi: 40,
@@ -3023,6 +3626,7 @@ if ((debugMode) && (debugModeChangesEnemyInventory)) { // If change enemy inv de
 
 } else {   // Normal (empty) inventory
     enemy = {
+        enemyBonusSoulEnergy: 0,
         enemyName : "none",
         enemyIntroMessage: "none",
         enemyDefeatMessage: "none",
@@ -3047,7 +3651,7 @@ if ((debugMode) && (debugModeChangesEnemyInventory)) { // If change enemy inv de
 ////
 
 
-let gameState = {pWI, items, enemy, playerName}    // Creates gamestate object (becomes GS in arguments).  Contains all modifiable data that the game must keep track of.
+let gameState = {pWI, items, enemy, playerName, soulEnergy, day, time}    // Creates gamestate object (becomes GS in arguments).  Contains all modifiable data that the game must keep track of.
 
 
 ////
@@ -3082,14 +3686,59 @@ launcher(gameState)
 
 Having if (userinput !== NaN) seems to fuck some stuff up so keep an eye on that.
 
-Stop dead Demon being able to be the active Demon
-
 Current ID system will break on game load.  Find a way to fix this when its not 3 am.
 
 Add actual AI to enemyTurnLogic
 
-Make using a move remove PP from the move
-
 Restore Demon stats after ending a battle for every evantuallity including running away
+
+Possibly implement a feature where the further on in the story you go the harder it is to sleep, making the player tend to sleep in more and more
+
+At some point in the game the player kills the librarian in order to gain unfetered access to the library.  After this, all books cost more in soul energy but player can access all of them.
+
+
+*/
+
+
+
+
+/* 
+Story points:
+
+Reason the player is only allowed to see three books at a time is because they are just an accolyte and accolytes are not allowed to view all books
+therefore player must only take from recent returns pile.  
+
+Every five sotry missions, the player could be called for a meeting by their master.  The master is dismissive and patronising until the player becomes
+too powerful.  Towards the end of the story, the player kills the master, and the headteacher, and several of the students. 
+
+The player has a nemesis!! Who they fight 3 or 4 times throughout the story.  The penultimate battle is a battle with the nemesis with incredibly strong demons.
+
+The final battle is the player's demons becoming too powerful for the player. The player has to fight the demons but gets absolutely destroyed. 
+
+Mortal shards instead of pokeballs
+
+If player loses battle, one of the demons will be sent to some kind of purgatory and the player will have to pay soul energy to revive it (as punishment for fucking up)
+
+*/
+
+
+
+/*
+DEFINITE TODOs
+
+Implement dreams / nightmares
+
+Implement ecolutions and evolution messages
+
+
+*/
+
+
+
+/*
+STRETCH GOALS
+
+Implement weather system to keep things fresh after player seeing main menu 100000 times
+
 
 */
