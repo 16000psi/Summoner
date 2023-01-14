@@ -3,7 +3,7 @@ import inquirer from 'inquirer';
 
 ////  UTILITIES
 
-let debugMode = false // flag which turns debug mode on and off.  Debug mode settings are below. Can be set on title menu buy entering 'debug'
+let debugMode = true // flag which turns debug mode on and off.  Debug mode settings are below. Can be set on title menu buy entering 'debug'
 
 
 const debugModePreservesConsole = false // If debug mode prints something instead of clearing the console
@@ -141,35 +141,66 @@ function mainMenu (GS) {
     console.log(`Day ${GS.day}                    ${timeOfDay(GS)}`)
     console.log("")
 
+    if (GS.displayAccessError !== "none") {  // diplsay access error is set as something other than none if player tries to access somewhere closed.
+                                                 // This is so the menu can neatly tell the player what has happened.
+
+        console.log(GS.displayAccessError)              
+
+        console.log("")
+
+        GS.displayAccessError = "none"
 
 
-    let menuMessage = ""
+
+    }
 
 
-    /// Following bit determines if sleep is available and sets menu message accordingly.
+    /// Following bit determines which places are open and if sleep is available and sets menu message accordingly.
 
     let sleepAvailable = false
+    let sleepAvailableMessage = ""
+
+    let libraryAvailable = false
+    let libraryAccessMessage = "mainMenu() says: I'm broken.  Something about the time or library access logic is wrong."
 
 
     if (GS.time >= 5 && GS.time < 7) {
 
         sleepAvailable = true
-        menuMessage = "It is getting late.\nTo view your Demons, enter A. To sleep, enter S"
+        libraryAvailable = false
+        sleepAvailableMessage = "It is getting late.\nTo sleep, enter S. "
+
+        libraryAccessMessage = "\nThe library is closed at this hour."
+
+        
         
     } 
 
     else if (GS.time >= 7) {
         sleepAvailable = true
+        libraryAvailable = false
 
-        menuMessage = "You are falling asleep where you stand.\nTo view your Demons, enter A. To sleep, enter S"
+        sleepAvailableMessage = "You are falling asleep where you stand.\nTo sleep, enter S. "
+        libraryAccessMessage = "\nThe library is closed at this ungodly hour."
     }
 
-    else if (GS.time < 5) {
+    else if (GS.time < 5 && GS.time > 0) {
         sleepAvailable = false
-        menuMessage = "To view your Demons, enter A."
+        libraryAvailable = true
+        sleepAvailableMessage = ""
+    }
+
+    else if (GS.time < 1) {
+        sleepAvailable = false
+        libraryAvailable = false
+        sleepAvailableMessage = ""
+
+        libraryAccessMessage = "\nIt is too early for the Library to be open.  Try again at 9am."
     }
 
     ///
+
+    let menuMessage = sleepAvailableMessage + "To view your Demons, enter A. To go to the Library, enter L"
 
 
     inquirer
@@ -190,6 +221,23 @@ function mainMenu (GS) {
             demonInventory(GS)
             demonInventoryMenu (GS)
 
+        }
+
+        else if (answers.mainMenu.toUpperCase() === "L") {  // go to the library
+
+            if (libraryAvailable) {                    // if it's the library's open hours
+
+                goneToTheLibrary(GS)
+
+            }
+
+            else if (!(libraryAvailable)) {   // if the library is closed, set display error to something so that it will be displayed with the menu being repeated
+
+                GS.displayAccessError = libraryAccessMessage
+
+                mainMenu(GS)
+                
+            }
         }
 
         else if (answers.mainMenu.toUpperCase() === "S") {  // go to sleep
@@ -383,11 +431,11 @@ function morningMessage (GS) {  // Continue and message that gets displayed indi
     let message = "This isn't right either!!"
 
     if (GS.time === 3) {
-        awakenText = "You manage to drag yourself from your chambers mid-afternoon, after sleeping-in spectacularly."
+        awakenText = "You manage to drag yourself from your chambers mid-afternoon, \nafter sleeping-in spectacularly."
         message = "What a pitty. "
     }
     else if (GS.time === 2) {
-        awakenText = "You awake from whatever type of slumber you were having at midday, get dressed hurriedly and leave your bedroom."
+        awakenText = "You awake from whatever type of slumber you were having at midday, \nget dressed hurriedly and leave your bedroom."
         message = ""
     }
     else if (GS.time === 1) {
@@ -430,6 +478,113 @@ function morningMessage (GS) {  // Continue and message that gets displayed indi
 
 
 }
+
+
+//// Library Functions
+
+function goneToTheLibrary (GS) {
+
+    if (GS.playerHasAccessedLibrary === false) {
+
+        introductionToLibrary1 (GS)
+    }
+
+    else if (GS.playerHasAccessedLibrary) {
+
+        consoleClear(GS)
+        
+        console.log("")
+
+        console.log("You walk accross the grounds to the library.")
+        console.log("You push open the heavy barrier door end enter.")
+
+        console.log("")
+
+        inquirer
+        .prompt
+        ([
+            {
+                name: "goneToTheLibrary",
+                message: "Enter to continue..."
+            }
+        ])
+        .then (answers => {
+
+            if (answers.goneToTheLibrary === "") {
+
+                libraryMainMenu(GS)
+            }
+            else if (answers.goneToTheLibrary !== "") {
+
+                goneToTheLibrary(GS)
+            }
+        })
+
+
+    }
+}
+
+function libraryMainMenu (GS) {
+
+    consoleClear(GS)
+
+    console.log("")
+    console.log("The library fire is roaring and the librarian is examining several books at the desk.")
+    console.log("")
+
+    if (GS.displayAccessError !== "none") {  
+
+        console.log(GS.displayAccessError)
+        console.log("")
+
+        GS.displayAccessError = "none"
+    }
+
+    
+
+    inquirer
+    .prompt 
+    ([
+        {
+            name: "libraryMainMenu",
+            message: "Enter B to take out books, and X to exit."
+        }
+    ])
+    .then (answers => {
+
+        if (answers.libraryMainMenu.toUpperCase() === "B") {  // NEED TO IMPLEMENT LIBRARY
+
+            if (GS.libraryAccessEnabled === true) {
+
+                console.log("LIBRARY NOT IMPLEMENTED. COMPLETE ME")
+            }
+
+            else if (GS.libraryAccessEnabled === false) {
+
+                GS.displayAccessError = "You are not permitted to take out books yet. Come back later."
+
+                libraryMainMenu(GS)
+
+
+            }
+        }
+
+        else if (answers.libraryMainMenu.toUpperCase() === "X") {   // if user decides to exit
+
+            leavingLibraryMessage(GS)
+        }
+
+        else if (answers.libraryMainMenu.toUpperCase() !== "X") {
+
+            libraryMainMenu(GS)
+        }
+    })
+}
+
+
+
+
+
 
 
 
@@ -3400,6 +3555,343 @@ function iDGenerator (iDList) {  // generates a new ID for every Demon BUT I've 
 }
 
 
+
+//// Tutorials / message chains
+
+function leavingLibraryMessage (GS) {
+
+    consoleClear(GS)
+
+    console.log("")
+    console.log("You leave the library and head back to your quarters.")
+    console.log("")
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "leavingLibraryMessage",
+            message: "Enter to continue..."
+        }
+    ])
+    .then (answers => {
+        if (answers.leavingLibraryMessage === "") {
+
+            mainMenu(GS)
+        }
+        else if (answers.leavingLibraryMessage !== "") {
+
+            leavingLibraryMessage(GS)
+        }
+    })
+}
+
+function introductionToLibrary1 (GS) {
+
+    consoleClear(GS)
+
+    console.log("")
+    console.log("You walk accross the grounds and find the library, a large annex on the side")
+    console.log("of the old chapel.  You walk up the small set of stone stairs leading to the")
+    console.log("entrance, a large, heavy door made of ebony wood.  The door has several large")
+    console.log("gouges that catch your eye, and a dozen or so small gilded runes made from a ")
+    console.log("light - coloured metal which have tarnished over many years exposed to the ")
+    console.log("elements.")
+    console.log("")
+    console.log("With some effort, you push the door open and are greeted by a rush of warm air.")
+    console.log("You enter the library.")
+    console.log("")
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "introductionToLibrary1",
+            message: "Enter to continue..."
+        }
+    ])
+    .then (answers => {
+
+        if (answers.introductionToLibrary1 === "") {
+
+            introductionToLibrary2(GS)
+        }
+
+        else if (answers.introductionToLibrary1 !== "") {
+
+            introductionToLibrary1(GS)
+        }
+    })
+}
+
+function introductionToLibrary2 (GS) {
+
+    consoleClear(GS)
+
+    console.log("")
+    console.log("You step into a large room and shut the heavy door behind you.  The room is")
+    console.log("well lit with torches and on your right is a lit fireplace surrounded by several")
+    console.log("battered but comfy looking bits of seating. In front of you is a grand oak desk,")
+    console.log("with someone you imagine to be the librarian stood behind it, pondering something")
+    console.log("as they examine a pile of several large tomes.  Most of the room behind the desk")
+    console.log("is taken up by many huge, densely arranged bookshelves which are each twice as")
+    console.log("tall as you.")
+    console.log("")
+    console.log("The librarian looks up and notices you standing, examining you with a frown.")
+    console.log("")
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "introductionToLibrary2",
+            message: "Enter to continue..."
+        }
+    ])
+    .then (answers => {
+
+        if (answers.introductionToLibrary2 === "") {
+
+            introductionToLibrary3(GS)
+        }
+
+        else if (answers.introductionToLibrary2 !== "") {
+
+            introductionToLibrary2(GS)
+        }
+    })
+}
+
+function introductionToLibrary3 (GS) {
+
+    consoleClear(GS)
+
+    console.log("")
+    console.log("'You must be a new accolyte' the librarian says, almost as if dissapointed, ")
+    console.log("either by the concept of having to interact with someone or simply by your")
+    console.log("unimpressive stature.")
+    console.log("'I hope you are not thinking of taking any of my books.' the librarian barks")
+    console.log("impulsively.")
+    console.log("'Or rather', the librarian stammers, 'the library's books. We have thousands")
+    console.log("of books here, and some are very ancient and powerful. *Accolytes* such as  ")
+    console.log("yourself are not allowed to access the full library, lest you do something")
+    console.log("stupid with a volume, or even worse, think yourself powerful enough to be able.")
+    console.log("to enact a ritual or spell detailed in a book.'")
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "introductionToLibrary3",
+            message: "Enter to continue..."
+        }
+    ])
+    .then (answers => {
+
+        if (answers.introductionToLibrary3 === "") {
+
+            introductionToLibrary4(GS)
+        }
+
+        else if (answers.introductionToLibrary3 !== "") {
+
+            introductionToLibrary3(GS)
+        }
+    })
+}
+
+function introductionToLibrary4 (GS) {
+
+    consoleClear(GS)
+
+    console.log("")
+    console.log("There is a pause, as if the librarian hopes you will leave.  You examine the")
+    console.log("library for a second.  The stone floors and walls are covered in rugs and faded")
+    console.log("paintings, but you notice that the stonework itself is battered and decrepit,")
+    console.log("with several large areas that seem to have been damaged by fire years ago.")
+    console.log("")
+    console.log("You must have had a curious look on your face, which the librarian clearly takes")
+    console.log("some kind of offence to. ")
+    console.log("")
+    console.log("'A bit *poky* for you is it?' the librarian sneers. 'I imagine it's not what")
+    console.log("you are used to.'")
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "introductionToLibrary4",
+            message: "Enter to continue..."
+        }
+    ])
+    .then (answers => {
+
+        if (answers.introductionToLibrary4 === "") {
+
+            introductionToLibrary5(GS)
+        }
+
+        else if (answers.introductionToLibrary4 !== "") {
+
+            introductionToLibrary4(GS)
+        }
+    })
+}
+
+function introductionToLibrary5 (GS) {
+
+    consoleClear(GS)
+
+    console.log("")
+    console.log("You get the impression that many accolytes at the Academy must be from esteemed")
+    console.log("families with sately homes, any the librarian assumes no different of you.")
+    console.log("")
+    console.log("'If you are curious - which I will say, can be more than fatal for accolytes -")
+    console.log("this library building was the scene of a battle many years ago, staged when a")
+    console.log("power-crazed accolyte was corrupted by the void and thought it wise to try to")
+    console.log("kill everyone at the Academy.  The library was the last refuge for those that ")
+    console.log("survived the initial onslaught of Demons summoned by the accolyte.  The large")
+    console.log("ebony door is actually a powerful magical barrier that was erected in order to")
+    console.log("delay the entry of the accolyte and their demons.'")
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "introductionToLibrary5",
+            message: "Enter to continue..."
+        }
+    ])
+    .then (answers => {
+
+        if (answers.introductionToLibrary5 === "") {
+
+            introductionToLibrary6(GS)
+        }
+
+        else if (answers.introductionToLibrary5 !== "") {
+
+            introductionToLibrary5(GS)
+        }
+    })
+}
+
+function introductionToLibrary6 (GS) {
+
+    consoleClear(GS)
+
+    console.log("")
+    console.log("'Eventually the accolyte was able to break the barrier with great effort,")
+    console.log("but enough time had been brought for the survivors to regroup.  A large and ")
+    console.log("disastrous battle occured within these walls, but eventually the acolyte was")
+    console.log("defeated and punished.'  The librarian glances at a small, old, bejewelled")
+    console.log("statue of a court jester, which is displayed in a small glass box by the ")
+    console.log("central bookcases.")
+    console.log("")
+    console.log("The acolytes soul was banished into that statue, to spend the rest of ")
+    console.log("eternity powerless, watching as the institution it almost destroyed slowly  ")
+    console.log("forgets it even existed.'")
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "introductionToLibrary6",
+            message: "Enter to continue..."
+        }
+    ])
+    .then (answers => {
+
+        if (answers.introductionToLibrary6 === "") {
+
+            introductionToLibrary7(GS)
+        }
+
+        else if (answers.introductionToLibrary6 !== "") {
+
+            introductionToLibrary6(GS)
+        }
+    })
+}
+
+function introductionToLibrary7 (GS) {
+
+    consoleClear(GS)
+
+    console.log("")
+    console.log("You stare, fixated by the statue.  As you stare, you feel a strange sense ")
+    console.log("of emptiness, and longing.  Suddenly, you are overwhelmed by the feeling as")
+    console.log("if someone is screaming inches from your face with their hands around your")
+    console.log("neck, squeezing the life out of you with the force of eternity. You are ")
+    console.log("startled, and quickly look away. The librarian smiles sardonically.")
+    console.log("")
+    console.log("'Yes, I wouldn't bother spending time examining it if I were you. The weak")
+    console.log("often find that that can be quite *challenging*.'")
+    console.log("You look down at the floor and then to the librarian, who is still smiling,")
+    console.log("as if seeing accolytes recoil at the statue is the best part of the job.")
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "introductionToLibrary7",
+            message: "Enter to continue..."
+        }
+    ])
+    .then (answers => {
+
+        if (answers.introductionToLibrary7 === "") {
+
+            introductionToLibrary8(GS)
+        }
+
+        else if (answers.introductionToLibrary7 !== "") {
+
+            introductionToLibrary7(GS)
+        }
+    })
+}
+
+function introductionToLibrary8 (GS) {
+
+    consoleClear(GS)
+
+    console.log("")
+    console.log("'Suffice to say, accolyte' the librarian sneers, 'that there are powers ")
+    console.log("within the library that are beyond you.  Do not be curious, do not ask to")
+    console.log("take out books, do not pester me.  Perhaps, *if* you prove yourself not")
+    console.log("to be as pathetic as the rest of the Academy's present day \"acolytes\", ")
+    console.log("then I will let you see some of the books.  Until then, you may satisfy")
+    console.log("me by leaving this buidling and its contents well alone.'")
+    console.log("")
+    console.log("")
+    console.log("")
+    console.log("")
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "introductionToLibrary8",
+            message: "You cannot use the library yet. Enter to continue..."
+        }
+    ])
+    .then (answers => {
+
+        if (answers.introductionToLibrary8 === "") {
+
+            GS.time ++    // the tutorial took some time
+            GS.playerHasAccessedLibrary = true // stops this tutorial from happening twice
+
+            libraryMainMenu(GS)
+        }
+
+        else if (answers.introductionToLibrary8 !== "") {
+
+            introductionToLibrary8(GS)
+        }
+    })
+}
   
 
 
@@ -3423,8 +3915,11 @@ function iDGenerator (iDList) {  // generates a new ID for every Demon BUT I've 
 
 //////////// Data Zone 
 
+let playerHasAccessedLibrary = false // if false, will display library tutorial first. 
+let libraryAccessEnabled = false
 let day = 1
-let time = 6
+let time = 1
+let displayAccessError = "none"
 let playerName = "hard drive bastard"
 let enemyName = "Evil Bastard"
 let enemyIntroMessage = "none"
@@ -3651,7 +4146,7 @@ if ((debugMode) && (debugModeChangesEnemyInventory)) { // If change enemy inv de
 ////
 
 
-let gameState = {pWI, items, enemy, playerName, soulEnergy, day, time}    // Creates gamestate object (becomes GS in arguments).  Contains all modifiable data that the game must keep track of.
+let gameState = {pWI, items, enemy, playerName, soulEnergy, day, time, displayAccessError, playerHasAccessedLibrary, libraryAccessEnabled}    // Creates gamestate object (becomes GS in arguments).  Contains all modifiable data that the game must keep track of.
 
 
 ////
@@ -3719,6 +4214,12 @@ Mortal shards instead of pokeballs
 
 If player loses battle, one of the demons will be sent to some kind of purgatory and the player will have to pay soul energy to revive it (as punishment for fucking up)
 
+Father is strict and selfish and mother is distant
+
+The player could have to fight the library door at some point.
+
+player has to fight to summon the acolyte from the stone statue
+
 */
 
 
@@ -3730,6 +4231,8 @@ Implement dreams / nightmares
 
 Implement ecolutions and evolution messages
 
+player has a power level which dictates how many demons you can control and the chance of catching demons at a particular level
+
 
 */
 
@@ -3739,6 +4242,8 @@ Implement ecolutions and evolution messages
 STRETCH GOALS
 
 Implement weather system to keep things fresh after player seeing main menu 100000 times
+
+Could make a tutorial that story wise preceeds attending the institution. (Instead of an actual battle it could just be a series of console.logs to make it easier!)
 
 
 */
