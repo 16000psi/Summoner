@@ -407,7 +407,11 @@ function sleeping (GS) {  // Displays dreams / nigthmares.  Also advances day.  
 
             calculateWakeUpTime(GS)  
 
+
+
             GS.day += 1       // advances the day
+
+            dayPassedRefreshInventories (GS)
 
             morningMessage(GS)
 
@@ -474,6 +478,22 @@ function morningMessage (GS) {  // Continue and message that gets displayed indi
             morningMessage(GS)
         }
     })
+
+
+
+}
+
+function dayPassedRefreshInventories (GS) {  // called every new day.  Checks to see if inventories need changing and does that
+
+    /// Library inventory   --- refreshes the library inbventory every three days
+
+    let day = parseInt(GS.day)
+    let refreshDay = day % 3
+    if (refreshDay === 0) {
+
+
+        GS.libraryInventory = refreshLibraryInventory(GS)
+    }
 
 
 
@@ -556,7 +576,7 @@ function libraryMainMenu (GS) {
 
             if (GS.libraryAccessEnabled === true) {
 
-                console.log("LIBRARY NOT IMPLEMENTED. COMPLETE ME")
+                viewAvailableBooks(GS)
             }
 
             else if (GS.libraryAccessEnabled === false) {
@@ -579,6 +599,139 @@ function libraryMainMenu (GS) {
             libraryMainMenu(GS)
         }
     })
+}
+
+function viewAvailableBooks (GS) {  // Displays the three viewable books and menu for viewing in detail
+
+    consoleClear(GS)
+
+    console.log("-     BOOK RETURN PILE     -")
+    console.log("")
+
+    for (let i in GS.libraryInventory) {
+
+        let move = GS.libraryInventory[i]
+
+        console.log(move.tomeName)
+        console.log("")
+    }
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "viewAvailableBooks",
+            message: "Enter 1 - 3 to view book.  X to exit."
+
+        }
+    ])
+    .then (answers => {
+
+        if (answers.viewAvailableBooks === "1" || answers.viewAvailableBooks === "2" || answers.viewAvailableBooks === "3") {
+
+            let selectionIndex = (parseInt(answers.viewAvailableBooks) - parseInt(1))
+
+            bookViewer(GS, selectionIndex)
+
+
+        }
+        else if (answers.viewAvailableBooks.toUpperCase() === "X") {
+
+            libraryMainMenu(GS)
+        }
+
+        else if (answers.viewAvailableBooks !== "1" && answers.viewAvailableBooks !== "2" & answers.viewAvailableBooks !== "3" && answers.viewAvailableBooks.toUpperCase() !== "X") {
+
+            viewAvailableBooks(GS)
+        }
+    })
+
+
+}
+
+function bookViewer (GS, selectionIndex) {
+
+    consoleClear(GS)
+
+    let move = GS.libraryInventory[selectionIndex]
+
+    console.log(`-   ${move.tomeName.toUpperCase()}  -`)
+    console.log("")
+    console.log(`This tome teaches ${move.name}.`)
+    console.log("")
+    console.log(`It costs ${move.tomeCost} SE to teach this move.`)
+    console.log("You have 2 Demons who can learn this move.")
+    console.log("")
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "bookViewer",
+            message: "Placeholdrr"
+        }
+    ])
+    .then (answers => {
+        if (answers.bookViewer.toUpperCase() === "Y") {
+
+            console.log("Demon selection screen.  Not Okay")
+        }
+
+        else if (answers.bookViewer.toUpperCase() === "X") {
+
+            viewAvailableBooks(GS)
+
+        }
+        else if (answers.bookViewer.toUpperCase() !== "Y" && answers.bookViewer.toUpperCase() !== "X") {
+
+            bookViewer(GS, selectionIndex)
+        }
+    })
+}
+
+function refreshLibraryInventory (GS) {  // returns an array of three moves (books) that are meant to replace the library inventory every 3 days
+
+    let allowedMoves = []
+    let resultNewInventory = []
+
+    for (let i in Object.keys(MOVES)) {    /// pushes all moves except struggle onto the allowed moves inventory
+
+        if (Object.keys(MOVES)[i] !== "struggle") {
+
+            allowedMoves.push(MOVES[Object.keys(MOVES)[i]])
+        }
+
+
+    }
+
+    let selectedMoveNames = []
+
+    while (selectedMoveNames.length < 4) {
+
+        let chosenMoveName = "none"
+
+        let chosenMove = allowedMoves[Math.floor(Math.random() * allowedMoves.length)] // randomly selects a move from allowed moves
+
+        chosenMoveName = chosenMove.name
+
+        if (!(selectedMoveNames.includes(chosenMoveName))) {
+
+            selectedMoveNames.push(chosenMoveName)
+            resultNewInventory.push(chosenMove)
+        }
+
+
+
+
+    }
+
+    if (resultNewInventory.length > 3) {
+        resultNewInventory.pop()
+    }
+
+    return resultNewInventory
+
+
 }
 
 
@@ -3915,8 +4068,8 @@ function introductionToLibrary8 (GS) {
 
 //////////// Data Zone 
 
-let playerHasAccessedLibrary = false // if false, will display library tutorial first. 
-let libraryAccessEnabled = false
+let playerHasAccessedLibrary = true // if false, will display library tutorial first. 
+let libraryAccessEnabled = true   // if the player can use the library
 let day = 1
 let time = 1
 let displayAccessError = "none"
@@ -3961,7 +4114,9 @@ const MOVES = {
         selfEffect: "none",
         enemyEffect: "none",
         maxPP: 10,
-        message: "ATTACKER tackles DEFENDER to the ground!"
+        message: "ATTACKER tackles DEFENDER to the ground!",
+        tomeName: "Treatise On Wrestling",
+        tomeCost: 300
     },
 
     fireball : {
@@ -3974,9 +4129,93 @@ const MOVES = {
         selfEffect: "none",
         enemyEffect: "random 0.9",
         maxPP: 10,
-        message: "ATTACKER launches a fireball at DEFENDER!"
-    }
+        message: "ATTACKER launches a fireball at DEFENDER!",
+        tomeName: "On The Kinetics of Fire Throwing",
+        tomeCost: 500
+    },
+
+    enshroud : {
+
+        name: "Enshroud",
+        type: abyss,
+        mode: "physical",
+        baseDamageMod: 0.8,
+        selfDamageMod: 0,
+        selfEffect: "none",
+        enemyEffect: "agi 0.8",
+        maxPP: 10,
+        message: "ATTACKER envelopes DEFENDER in a mass of smoke!",
+        tomeName: "The Tendrils Of The Abyss",
+        tomeCost: 300
+    },
+
+    naturesGrasp: {
+
+        name: "Natures Grasp",
+        type: nature,
+        mode: "physical",
+        baseDamageMod: 1.2,
+        selfDamageMod: 0,
+        selfEffect: "none",
+        enemyEffect: "none",
+        maxPP: 10,
+        message: "ATTACKER grips DEFENDER with a thorny appendage!",
+        tomeName: "The Trough Of Bowland",
+        tomeCost: 300
+    },
+
+    divineHammer : {
+
+        name: "Divine Hammer",
+        type: light,
+        mode: "physical",
+        baseDamageMod: 1.4,
+        selfDamageMod: 0.02,
+        selfEffect: "none",
+        enemyEffect: "str 0.9",
+        maxPP: 10,
+        message: "ATTACKER strikes DEFENDER with rightcheous fury!",
+        tomeName: "Absolution of The Damned",
+        tomeCost: 300
+    },
+
+    witheringTorrent : {
+
+        name: "Withering Torrent",
+        type: scourge,
+        mode: "mental",
+        baseDamageMod: 1.1,
+        selfDamageMod: 0.05,
+        selfEffect: "none",
+        enemyEffect: "random 0.8",
+        maxPP: 10,
+        message: "ATTACKER overwhelms DEFENDER with a wave of putrid decay!",
+        tomeName: "Walls of Decay",
+        tomeCost: 300
+    },
+
+    scratch : {
+
+        name: "Scratch",
+        type: somatic,
+        mode: "physical",
+        baseDamageMod: 0.7,
+        selfDamageMod: 0,
+        selfEffect: "none",
+        enemyEffect: "agi 0.95",
+        maxPP: 10,
+        message: "ATTACKER scratches DEFENDER!",
+        tomeName: "Animalistic Straits",
+        tomeCost: 300
+    },
 }
+
+
+
+//// Library Inventory
+
+let libraryInventory = [MOVES.fireball, MOVES.enshroud, MOVES.divineHammer]
+
 
 
 
@@ -4146,7 +4385,8 @@ if ((debugMode) && (debugModeChangesEnemyInventory)) { // If change enemy inv de
 ////
 
 
-let gameState = {pWI, items, enemy, playerName, soulEnergy, day, time, displayAccessError, playerHasAccessedLibrary, libraryAccessEnabled}    // Creates gamestate object (becomes GS in arguments).  Contains all modifiable data that the game must keep track of.
+let gameState = {pWI, items, enemy, playerName, soulEnergy, day, time, displayAccessError,
+     playerHasAccessedLibrary, libraryAccessEnabled, libraryInventory}    // Creates gamestate object (becomes GS in arguments).  Contains all modifiable data that the game must keep track of.
 
 
 ////
@@ -4232,6 +4472,8 @@ Implement dreams / nightmares
 Implement ecolutions and evolution messages
 
 player has a power level which dictates how many demons you can control and the chance of catching demons at a particular level
+
+players power level dictates which rituals they can perform at the shrine
 
 
 */
