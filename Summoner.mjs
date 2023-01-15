@@ -94,6 +94,10 @@ function launcher (GS) {
         introPage(GS)
     }
 
+
+
+    GS.libraryInventory = refreshLibraryInventory(GS)  // SETS LIBRARY INVENTORY
+
 }
 
 
@@ -502,7 +506,7 @@ function dayPassedRefreshInventories (GS) {  // called every new day.  Checks to
 
 //// Library Functions
 
-function goneToTheLibrary (GS) {
+function goneToTheLibrary (GS) {  // takes stage of the story player is at and launches appropriate library related function
 
     if (GS.playerHasAccessedLibrary === false) {
 
@@ -649,18 +653,50 @@ function viewAvailableBooks (GS) {  // Displays the three viewable books and men
 
 }
 
-function bookViewer (GS, selectionIndex) {
+function bookViewer (GS, selectionIndex) {  // Shows details of tome and the number of demons that can learn the move
+
+
+    let teachableTallyMessage = ""
+
+    let menuMessage = ""
+
+    let move = GS.libraryInventory[selectionIndex]
+
+    let teachableTally = tallyTeachableDemons(GS, move)
+
+    let moveCanBeTaught = false
+
+    if (teachableTally === 0) {
+
+        teachableTallyMessage = "None of your demons can learn this move."
+
+        menuMessage = "Enter X to exit."
+    }
+
+    else if (teachableTally > 0) {
+
+        moveCanBeTaught = true
+
+        teachableTallyMessage = `${teachableTally} of your demons can learn this move.`
+
+        menuMessage = "Enter T to view the demons that can learn this move. Enter X to exit."
+    }
+
+
+
+    
 
     consoleClear(GS)
 
-    let move = GS.libraryInventory[selectionIndex]
+   
+
 
     console.log(`-   ${move.tomeName.toUpperCase()}  -`)
     console.log("")
     console.log(`This tome teaches ${move.name}.`)
     console.log("")
     console.log(`It costs ${move.tomeCost} SE to teach this move.`)
-    console.log("You have 2 Demons who can learn this move.")
+    console.log(teachableTallyMessage)
     console.log("")
 
     inquirer
@@ -668,13 +704,25 @@ function bookViewer (GS, selectionIndex) {
     ([
         {
             name: "bookViewer",
-            message: "Placeholdrr"
+            message: menuMessage
         }
     ])
     .then (answers => {
-        if (answers.bookViewer.toUpperCase() === "Y") {
+        if (answers.bookViewer.toUpperCase() === "T") {
 
-            console.log("Demon selection screen.  Not Okay")
+            if (moveCanBeTaught) {
+
+                teachableDemonsMenu (GS, move, selectionIndex)
+
+
+            }
+
+            else if (!(moveCanBeTaught)) {
+
+                bookViewer(GS, selectionIndex)
+            }
+
+            
         }
 
         else if (answers.bookViewer.toUpperCase() === "X") {
@@ -682,11 +730,325 @@ function bookViewer (GS, selectionIndex) {
             viewAvailableBooks(GS)
 
         }
-        else if (answers.bookViewer.toUpperCase() !== "Y" && answers.bookViewer.toUpperCase() !== "X") {
+        else if (answers.bookViewer.toUpperCase() !== "T" && answers.bookViewer.toUpperCase() !== "X") {
 
             bookViewer(GS, selectionIndex)
         }
     })
+}
+
+function teachableDemonsMenu (GS, move, bookViewerSelectionIndex) { // Menu for selecting the demon to teach a move
+
+    consoleClear(GS)
+
+    let teachableDemons = viewTeachableDemons(GS, move)
+
+    if (displayAccessError !== "none") {
+
+        console.log(displayAccessError)
+        console.log("")
+
+        displayAccessError = "none"
+    }
+
+
+    let menuMessage = ""
+
+    if (teachableDemons.length === 1) {
+
+        menuMessage = "Enter 1 to select the Demon to teach.  Enter X to exit."
+    }
+
+    else if (teachableDemons.length > 1) {
+
+        menuMessage = `Enter 1-${teachableDemons.length} to select the Demon to teach.  Enter X to exit.`
+    }
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "teachableDemonsMenu",
+            message: menuMessage
+        }
+    ])
+    .then (answers => {
+
+        let selectionIndex = (parseInt(answers.teachableDemonsMenu) - parseInt(1))
+
+        if (parseInt(answers.teachableDemonsMenu) > teachableDemons.length) {  // if selection number is larger than the length of the array
+
+            teachableDemonsMenu(GS, move, bookViewerSelectionIndex)           // rerun the menu
+        }
+
+        else if (answers.teachableDemonsMenu === "1" || answers.teachableDemonsMenu === "2" ||
+        answers.teachableDemonsMenu === "3" || answers.teachableDemonsMenu === "4" ||
+        answers.teachableDemonsMenu === "5" || answers.teachableDemonsMenu === "6" ) {   // if user selects a number
+
+            if (teachableDemons[selectionIndex].hP < 1) {  // if demon is 0 hp.  
+
+                displayAccessError = "This Demon needs to recover before you can teach it anything."
+
+                teachableDemonsMenu(GS, move, bookViewerSelectionIndex)
+            }
+
+            else if (teachableDemons[selectionIndex].hP >= 1) {   // if demon is alive
+
+                teachMoveMenu(GS, move, teachableDemons[selectionIndex], bookViewerSelectionIndex)
+            }
+
+        }
+
+        else if (answers.teachableDemonsMenu.toUpperCase() === "X") {  // if user exits exit to book desciption
+
+            bookViewer (GS, bookViewerSelectionIndex)
+
+
+        }
+
+        else if (answers.teachableDemonsMenu.toUpperCase() !== "X" &&
+        answers.teachableDemonsMenu !== "1" && answers.teachableDemonsMenu !== "2" &&
+        answers.teachableDemonsMenu !== "3" && answers.teachableDemonsMenu !== "4" &&
+        answers.teachableDemonsMenu !== "5" && answers.teachableDemonsMenu !== "6") {   // if selection invalid
+
+            teachableDemonsMenu(GS, move, bookViewerSelectionIndex)
+
+        }
+    })
+}
+
+function teachMoveMenu (GS, move, demon, bookViewerSelectionIndex) {
+
+    consoleClear(GS)
+
+    displayDemonMoves(demon)
+
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "teachMoveMenu",
+            message: "Enter 1-4 to select slot. Enter X to cancel."
+        }
+    ])
+    .then ( answers => {
+
+        if (answers.teachMoveMenu === "1" || answers.teachMoveMenu === "2" || answers.teachMoveMenu === "3" || answers.teachMoveMenu === "4") {  // valid number for slot
+
+            let selectionIndex = (parseInt(answers.teachMoveMenu) - parseInt(1))
+
+            confirmTeachMove(GS, move, demon, bookViewerSelectionIndex, selectionIndex)
+        }
+
+        else if (answers.teachMoveMenu.toUpperCase() === "X") {  // exits
+
+            teachableDemonsMenu(GS, move, bookViewerSelectionIndex)
+
+
+        }
+
+        else if (answers.teachMoveMenu !== "1" && answers.teachMoveMenu !== "2" && answers.teachMoveMenu !== "3" &&
+         answers.teachMoveMenu !== "4" && answers.teachMoveMenu.toUpperCase() !== "X") {   // invalid selection
+
+            teachMoveMenu (GS, move, demon, bookViewerSelectionIndex)
+
+
+         }
+    })
+}
+
+function confirmTeachMove(GS, move, demon, bookViewerSelectionIndex, teachMoveMenuSelectionIndex) {
+
+    consoleClear(GS)
+
+    displayDemonMoves(demon)
+
+    let menuMessage = ""
+
+
+
+    if (Object.keys(demon.knownMoves[teachMoveMenuSelectionIndex]).length > 0) {  // checks if move is present
+
+        menuMessage = `This will overwrite ${demon.knownMoves[teachMoveMenuSelectionIndex].name} with ${move.name}.  This action cannot be undone.\n Enter Y to confirm or X to cancel.`
+    }
+
+    else if (Object.keys(demon.knownMoves[teachMoveMenuSelectionIndex]).length === 0) {
+
+        menuMessage = `Teach ${demonName(demon)} ${move.name}?\n Enter Y to confirm or X to cancel.`
+    }
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "confirmTeachMove",
+            message: menuMessage
+        }
+    ])
+
+    .then (answers => {
+
+        if (answers.confirmTeachMove.toUpperCase() === "Y") {
+
+            demon.knownMoves[teachMoveMenuSelectionIndex] = move
+
+            moveTaughtContinue (GS, demon, move)
+
+
+        }
+
+        else if (answers.confirmTeachMove.toUpperCase() === "X") {
+
+            teachMoveMenu (GS, move, demon, bookViewerSelectionIndex)
+
+            
+        }
+
+        else if (answers.confirmTeachMove.toUpperCase() !== "Y" && answers.confirmTeachMove.toUpperCase() !== "X") {
+
+            confirmTeachMove(GS, move, demon, bookViewerSelectionIndex, teachMoveMenuSelectionIndex)
+
+
+        }
+    })
+
+
+
+
+}
+
+function moveTaughtContinue (GS, demon, move) {
+
+    consoleClear(GS)
+    displayDemonMoves(demon)
+
+    console.log("")
+
+    console.log(`${demonName(demon)} successfully taught ${move.name}`)
+    console.log("")
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "moveTaughtContinue",
+            message: "Enter to continue..."
+        }
+    ])
+    .then (answers => {
+
+        if (answers.moveTaughtContinue === "") {
+
+            libraryMainMenu(GS)
+        }
+
+        else if (answers.moveTaughtContinue !== "") {
+
+            moveTaughtContinue (GS, demon, move)
+
+
+        }
+    })
+}
+
+function viewTeachableDemons (GS, move) {  // prints teachable demons for move and also returns an array containing demon objects that are teachable.
+
+    console.log(`-   ${move.tomeName.toUpperCase()}  -`)
+    console.log("")
+
+
+    let teachableDemons = []
+
+    for (let i in GS.pWI) {
+
+        if (move.canLearn.includes(GS.pWI[i].species)) {
+
+            teachableDemons.push(GS.pWI[i])
+
+
+        }
+
+
+    }
+
+    for (let i in teachableDemons) {
+
+        let nameString = ""
+
+        if (teachableDemons[i].nickname !== "none") {
+
+            nameString = (parseInt(i) + 1) + ": " + teachableDemons[i].species + " - \"" + demonName(teachableDemons[i]) + "\""
+
+
+        }
+
+        else {
+
+            nameString = (parseInt(i) + 1) + ": " + teachableDemons[i].species 
+
+        }
+
+        console.log(`${nameString}`)
+
+        if (teachableDemons[i].hP < 1) {
+            console.log("0 HP.  Must recover before teaching.")
+        }
+
+        else {
+            console.log("")
+        }
+        
+    }
+
+    console.log("")
+
+    return teachableDemons
+
+}
+
+function tallyTeachableDemons (GS, move) {  // returns a number which is the number of demons in the inventory that can learn a move
+
+
+    let result = 0
+
+    for (let i in GS.pWI) {
+
+        if (Object.keys(GS.pWI[i]).length > 0) {
+
+            if (testIfTeachable(GS.pWI[i], move)) {
+
+                result ++
+            }
+        }
+    }
+
+    return result
+
+
+
+
+}
+
+function testIfTeachable (demon, move) {  // returns a boolean for  if a demon can learn a move
+
+
+
+    if (move.canLearn.includes(demon.species)) {
+
+
+        return true
+
+    }
+
+    else {
+
+        return false
+
+        
+    }
+
+    
 }
 
 function refreshLibraryInventory (GS) {  // returns an array of three moves (books) that are meant to replace the library inventory every 3 days
@@ -1162,6 +1524,35 @@ function swapDemon (GS) { // menu and logic for swapping Demon
 
 
     })
+}
+
+function displayDemonMoves (demon) {  // Diplays the moves a demon knows.
+
+    console.log(`-   ${demonName(demon).toUpperCase()} MOVES   -`)
+
+    console.log("")
+
+    for (let i in demon.knownMoves) {
+
+
+        if (Object.keys(demon.knownMoves[i]).length < 1) {  // empty slot
+
+            console.log (`${(parseInt(i) + parseInt(1))}: - - - SLOT EMPTY - - - `)
+            console.log ("")
+        }
+
+        else {   // slot with move in 
+
+            console.log((`${(parseInt(i) + parseInt(1))}: ${demon.knownMoves[i].name}`))
+            console.log("")
+        }
+
+        
+    }
+
+    console.log("")
+
+
 }
 
 
@@ -4098,7 +4489,9 @@ const MOVES = {
         selfEffect: "none",
         enemyEffect: "none",
         maxPP: 100000000,
-        message: "ATTACKER punches DEFENDER in the face."
+        message: "ATTACKER punches DEFENDER in the face.",
+        tomeCost: 300000,
+        canLearn: ["all"]
         
 
 
@@ -4116,7 +4509,8 @@ const MOVES = {
         maxPP: 10,
         message: "ATTACKER tackles DEFENDER to the ground!",
         tomeName: "Treatise On Wrestling",
-        tomeCost: 300
+        tomeCost: 300,
+        canLearn: ["Imp", "Void Walker", "Fetid Shadow"]
     },
 
     fireball : {
@@ -4131,7 +4525,8 @@ const MOVES = {
         maxPP: 10,
         message: "ATTACKER launches a fireball at DEFENDER!",
         tomeName: "On The Kinetics of Fire Throwing",
-        tomeCost: 500
+        tomeCost: 500,
+        canLearn: ["Imp", "Void Walker", "Noble Spirit"]
     },
 
     enshroud : {
@@ -4146,7 +4541,8 @@ const MOVES = {
         maxPP: 10,
         message: "ATTACKER envelopes DEFENDER in a mass of smoke!",
         tomeName: "The Tendrils Of The Abyss",
-        tomeCost: 300
+        tomeCost: 300,
+        canLearn: ["Imp", "Void Walker", "Fetid Shadow"]
     },
 
     naturesGrasp: {
@@ -4161,7 +4557,8 @@ const MOVES = {
         maxPP: 10,
         message: "ATTACKER grips DEFENDER with a thorny appendage!",
         tomeName: "The Trough Of Bowland",
-        tomeCost: 300
+        tomeCost: 300,
+        canLearn: [ "Void Walker", "Fetid Shadow", "Noble Spirit"]
     },
 
     divineHammer : {
@@ -4176,7 +4573,8 @@ const MOVES = {
         maxPP: 10,
         message: "ATTACKER strikes DEFENDER with rightcheous fury!",
         tomeName: "Absolution of The Damned",
-        tomeCost: 300
+        tomeCost: 300,
+        canLearn: ["Void Walker", "Noble Spirit"]
     },
 
     witheringTorrent : {
@@ -4191,7 +4589,8 @@ const MOVES = {
         maxPP: 10,
         message: "ATTACKER overwhelms DEFENDER with a wave of putrid decay!",
         tomeName: "Walls of Decay",
-        tomeCost: 300
+        tomeCost: 300,
+        canLearn: ["Void Walker", "Fetid Shadow"]
     },
 
     scratch : {
@@ -4206,7 +4605,8 @@ const MOVES = {
         maxPP: 10,
         message: "ATTACKER scratches DEFENDER!",
         tomeName: "Animalistic Straits",
-        tomeCost: 300
+        tomeCost: 300,
+        canLearn: ["Imp", "Void Walker", "Fetid Shadow", "Noble Spirit"]
     },
 }
 
@@ -4229,8 +4629,8 @@ if ((debugMode) && (debugModeChangesInventory)) { // Sets Demon inventory.  Debu
             nickname: "mega bastard",
             active: true,
             type: destruction,
-            genus: "brute",
-            species: "brawler",
+            genus: "Imp",
+            species: "Imp",
             maxHP: 456,
             hP: 456,
             level: 1,
@@ -4253,10 +4653,10 @@ if ((debugMode) && (debugModeChangesInventory)) { // Sets Demon inventory.  Debu
             nickname: "none",
             active: false,
             type: light,
-            genus: "cultured",
-            species: "patrician",
+            genus: "Ghost",
+            species: "Noble Spirit",
             maxHP: 456,
-            hP: 456,
+            hP: 0,
             level: 1,
             xp: 0,
             str: 20,
@@ -4304,9 +4704,9 @@ if ((debugMode) && (debugModeChangesEnemyInventory)) { // If change enemy inv de
                 id: iDGenerator(iDListArray),
                 nickname: "fuckheads",
                 active: true,
-                type: destruction,
-                genus: "brute",
-                species: "brawler",
+                type: abyss,
+                genus: "Void",
+                species: "Void Walker",
                 maxHP: 456,
                 hP: 456,
                 level: 12,
@@ -4329,9 +4729,9 @@ if ((debugMode) && (debugModeChangesEnemyInventory)) { // If change enemy inv de
                 id: iDGenerator(iDListArray),
                 nickname: "none",
                 active: false,
-                type: light,
-                genus: "cultured",
-                species: "patrician",
+                type: scourge,
+                genus: "Fetid",
+                species: "Fetid Shadow",
                 maxHP: 456,
                 hP: 0,
                 level: 22,
@@ -4416,6 +4816,22 @@ launcher(gameState)
 
 
 
+/// TODO NEXT
+
+/*
+Make it so that demons cannot learn a move twice.
+
+Make it so that books cost soul energy to teach 
+
+Make it so that teaching a demon a move takes actual time and stuff
+
+Make it so that the librarian says something like - make sure that book is returned by sunrise.  If not you will never step foot in here again.
+
+
+*/
+
+
+
 
 /* Notes:
 
@@ -4427,9 +4843,9 @@ Add actual AI to enemyTurnLogic
 
 Restore Demon stats after ending a battle for every evantuallity including running away
 
-Possibly implement a feature where the further on in the story you go the harder it is to sleep, making the player tend to sleep in more and more
 
-At some point in the game the player kills the librarian in order to gain unfetered access to the library.  After this, all books cost more in soul energy but player can access all of them.
+
+
 
 
 */
@@ -4460,6 +4876,8 @@ The player could have to fight the library door at some point.
 
 player has to fight to summon the acolyte from the stone statue
 
+At some point in the game the player kills the librarian in order to gain unfetered access to the library.  After this, all books cost more in soul energy but player can access all of them.
+
 */
 
 
@@ -4485,7 +4903,11 @@ STRETCH GOALS
 
 Implement weather system to keep things fresh after player seeing main menu 100000 times
 
-Could make a tutorial that story wise preceeds attending the institution. (Instead of an actual battle it could just be a series of console.logs to make it easier!)
+Could make a tutorial that story wise preceeds attending the institution. (Instead of an actual battle it could just be a series of console.log fakes to make it easier!)
+
+Possibly implement a feature where the further on in the story you go the harder it is to sleep, making the player tend to sleep in more and more
+
+Make it so that later on in the story the library door opens easier as it gets used to your soul.
 
 
 */
