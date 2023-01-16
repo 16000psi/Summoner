@@ -1287,6 +1287,8 @@ function demonInventory (GS) {    // Prints info for Demon inventory
         console.log(resultDisplay[j])
     }
 
+    console.log("")
+
 }
 
 function demonPressenceTester (GS, selection) {  // tests if the selected slot in the Demon menu has a Demon in it
@@ -1323,12 +1325,14 @@ function demonAliveTester (GS, selection) { // tests if selected slot in Demon m
 
 function demonViewerMenu (GS, selection) {  // prompt and conditional logic for Demon viewer menu
 
+    let demon = GS.pWI[(parseInt(selection) - parseInt(1))]
+
     inquirer
     .prompt
     ([
         {
             name: "viewerMenuSelection",
-            message: "Press N to change nickname.  Press X to exit"
+            message: "Enter M to view moves, N to change nickname and X to exit"
 
         }
     ])
@@ -1343,6 +1347,20 @@ function demonViewerMenu (GS, selection) {  // prompt and conditional logic for 
             nicknameChanger(GS, selection)       // launches nickname changer 
         }
 
+        else if (answers.viewerMenuSelection.toUpperCase() === "M") {  // user wants to view moves
+
+
+            demonMovesMenu (GS, demon, selection)
+
+
+
+            
+
+            
+
+
+        }
+
         else if (answers.viewerMenuSelection.toUpperCase() === "X") {  // goes back to inventory if user input X
 
             consoleClear(GS)
@@ -1350,7 +1368,7 @@ function demonViewerMenu (GS, selection) {  // prompt and conditional logic for 
             demonInventoryMenu (GS)
         }
 
-        else if (a !== "N" && a !== "X") {   // if the selection wasnt valid
+        else if (a !== "M" && a !== "N" && a !== "X") {   // if the selection wasnt valid
 
             consoleClear(GS)
             demonViewer (GS, selection)
@@ -1365,6 +1383,41 @@ function demonViewerMenu (GS, selection) {  // prompt and conditional logic for 
     })
 
 
+}
+
+function demonMovesMenu (GS, demon, selection) {
+
+    consoleClear(GS)
+
+    displayDemonMoves (demon)
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "demonMovesMenu",
+            message: "Enter X to exit."
+        }
+    ])
+    .then ( answers => {
+
+        if (answers.demonMovesMenu.toUpperCase() === "X") {
+
+            consoleClear(GS)
+
+            demonViewer(GS, selection)
+
+            demonViewerMenu(GS, selection)
+
+
+        }
+
+        else if (answers.demonMovesMenu.toUpperCase() !== "X") {
+
+            demonMovesMenu (GS, demon, selection)
+
+        }
+    })
 }
 
 function demonViewer (GS, selection) {      // display for Demon viewer
@@ -1382,6 +1435,8 @@ function demonViewer (GS, selection) {      // display for Demon viewer
     console.log(`HP:  ${selectedDemonObj.hP}/${selectedDemonObj.maxHP}      XP: ${selectedDemonObj.xp}`)
     console.log(`Strength:  ${selectedDemonObj.str}          Agility:  ${selectedDemonObj.agi}`)
     console.log(`Defence:   ${selectedDemonObj.def}    Mental Acuity:  ${selectedDemonObj.pow}`)
+
+    console.log("")
 
 }
 
