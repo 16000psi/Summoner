@@ -764,6 +764,25 @@ function teachableDemonsMenu (GS, move, bookViewerSelectionIndex) { // Menu for 
         menuMessage = `Enter 1-${teachableDemons.length} to select the Demon to teach.  Enter X to exit.`
     }
 
+    let canTeach = false
+
+    if (GS.soulEnergy >= move.tomeCost) {
+
+        canTeach = true
+
+        
+
+        menuMessage = "Enter 1-4 to select slot. Enter X to cancel."
+    }
+
+    else if (GS.soulEnergy < move.tomeCost) {
+
+        canTeach = false
+
+        menuMessage = "You do not have enough Soul Energy to teach this move. \n Enter X to cancel."
+    }
+
+
     inquirer
     .prompt
     ([
@@ -785,16 +804,44 @@ function teachableDemonsMenu (GS, move, bookViewerSelectionIndex) { // Menu for 
         answers.teachableDemonsMenu === "3" || answers.teachableDemonsMenu === "4" ||
         answers.teachableDemonsMenu === "5" || answers.teachableDemonsMenu === "6" ) {   // if user selects a number
 
-            if (teachableDemons[selectionIndex].hP < 1) {  // if demon is 0 hp.  
+            if (testIfMoveKnown(move, teachableDemons[selectionIndex])) {   // if the move is already known
+
+                canTeach = false
+
+                displayAccessError = `This Demon already known ${move.name}.`
+
+                teachableDemonsMenu(GS, move, bookViewerSelectionIndex)
+
+                return   // stop "too many listeners" crash
+
+
+
+            }
+
+
+
+
+            if (canTeach) {
+
+                if (teachableDemons[selectionIndex].hP < 1) {  // if demon is 0 hp.  
 
                 displayAccessError = "This Demon needs to recover before you can teach it anything."
 
                 teachableDemonsMenu(GS, move, bookViewerSelectionIndex)
-            }
+                }
 
-            else if (teachableDemons[selectionIndex].hP >= 1) {   // if demon is alive
+                else if (teachableDemons[selectionIndex].hP >= 1) {   // if demon is alive
 
                 teachMoveMenu(GS, move, teachableDemons[selectionIndex], bookViewerSelectionIndex)
+                }
+
+            }
+
+            else if (!(canTeach)) {
+
+                teachableDemonsMenu(GS, move, bookViewerSelectionIndex)
+
+
             }
 
         }
@@ -870,12 +917,12 @@ function confirmTeachMove(GS, move, demon, bookViewerSelectionIndex, teachMoveMe
 
     if (Object.keys(demon.knownMoves[teachMoveMenuSelectionIndex]).length > 0) {  // checks if move is present
 
-        menuMessage = `This will overwrite ${demon.knownMoves[teachMoveMenuSelectionIndex].name} with ${move.name}.  This action cannot be undone.\n Enter Y to confirm or X to cancel.`
+        menuMessage = `This will overwrite ${demon.knownMoves[teachMoveMenuSelectionIndex].name} with ${move.name}.  This action cannot be undone.\nTeaching Demons is hard work and will likely take several hours. \nEnter Y to confirm or X to cancel.`
     }
 
     else if (Object.keys(demon.knownMoves[teachMoveMenuSelectionIndex]).length === 0) {
 
-        menuMessage = `Teach ${demonName(demon)} ${move.name}?\n Enter Y to confirm or X to cancel.`
+        menuMessage = `Teach ${demonName(demon)} ${move.name}?\nTeaching Demons is hard work and will likely take several hours. \nEnter Y to confirm or X to cancel.`
     }
 
     inquirer
@@ -893,7 +940,7 @@ function confirmTeachMove(GS, move, demon, bookViewerSelectionIndex, teachMoveMe
 
             demon.knownMoves[teachMoveMenuSelectionIndex] = move
 
-            moveTaughtContinue (GS, demon, move)
+            moveBeingTaught1 (GS, demon, move)
 
 
         }
@@ -913,10 +960,9 @@ function confirmTeachMove(GS, move, demon, bookViewerSelectionIndex, teachMoveMe
         }
     })
 
-
-
-
 }
+
+
 
 function moveTaughtContinue (GS, demon, move) {
 
@@ -940,7 +986,15 @@ function moveTaughtContinue (GS, demon, move) {
 
         if (answers.moveTaughtContinue === "") {
 
-            libraryMainMenu(GS)
+            GS.time += 4
+
+            if (GS.time > 7) {   // advances time
+                GS.time = 7
+            }
+
+            GS.soulEnergy -= move.tomeCost    // takes soul energy away
+
+            mainMenu(GS)
         }
 
         else if (answers.moveTaughtContinue !== "") {
@@ -963,6 +1017,8 @@ function viewTeachableDemons (GS, move) {  // prints teachable demons for move a
     for (let i in GS.pWI) {
 
         if (move.canLearn.includes(GS.pWI[i].species)) {
+
+         
 
             teachableDemons.push(GS.pWI[i])
 
@@ -991,20 +1047,47 @@ function viewTeachableDemons (GS, move) {  // prints teachable demons for move a
 
         console.log(`${nameString}`)
 
-        if (teachableDemons[i].hP < 1) {
-            console.log("0 HP.  Must recover before teaching.")
+        if (testIfMoveKnown(move, teachableDemons[i])) {  // print if move is already known
+
+            console.log("Move already known.")
         }
 
-        else {
-            console.log("")
+        else if (!(testIfMoveKnown(move, GS.pWI[i]))) {  // if move not already known
+
+            if (teachableDemons[i].hP < 1) {           // print if demon is dead
+                console.log("0 HP.  Must recover before teaching.")
+            }
+
+            else {
+                console.log("")
+            }
+
         }
         
     }
 
     console.log("")
 
+    
+
     return teachableDemons
 
+}
+
+function testIfMoveKnown (move, demon) {  // returns a boolean for if the move is already known
+
+    for (let i in demon.knownMoves) {
+
+        if (Object.keys(demon.knownMoves[i].length > 0)) {
+
+            if (move.name === demon.knownMoves[i].name) {
+
+                return true
+            }
+        }
+    }
+
+    return false
 }
 
 function tallyTeachableDemons (GS, move) {  // returns a number which is the number of demons in the inventory that can learn a move
@@ -4102,7 +4185,7 @@ function iDGenerator (iDList) {  // generates a new ID for every Demon BUT I've 
 
 //// Tutorials / message chains
 
-function leavingLibraryMessage (GS) {
+function leavingLibraryMessage (GS) {  
 
     consoleClear(GS)
 
@@ -4130,7 +4213,7 @@ function leavingLibraryMessage (GS) {
     })
 }
 
-function introductionToLibrary1 (GS) {
+function introductionToLibrary1 (GS) {  // when player first visits the libary
 
     consoleClear(GS)
 
@@ -4437,7 +4520,119 @@ function introductionToLibrary8 (GS) {
     })
 }
   
+function moveBeingTaught1 (GS, demon, move)  {  // when player teaches a demon a move
 
+    consoleClear(GS)
+
+    console.log("")
+    console.log("You pick up the book from the desk and leave the library.  As you are leaving")
+    console.log("the Librarian grunts angrily and shouts after you -")
+    console.log("")
+    console.log("'Be careful with that book, accolyte!'")
+    console.log("")
+    console.log("You pull open the great barrier door with the tome tucked under your shoulder,")
+    console.log("and fumble, almost dropping the book.")
+    console.log("")
+    console.log("'If that book is not in the library mailbox before sunrise you shall never step")
+    console.log("foot in here again!' the Librarian barks as you heave the door shut.")
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "moveBeingTaught1",
+            message: "Enter to continue..."
+        }
+    ])
+    .then (answers => {
+
+        if (answers.moveBeingTaught1 === "") {
+
+            moveBeingTaught2(GS, demon, move)
+        }
+
+        else if (answers.moveBeingTaught1 !== "") {
+
+            moveBeingTaught1(GS, demon, move)
+        }
+    })
+}
+
+function moveBeingTaught2 (GS, demon, move)  {
+
+    consoleClear(GS)
+
+    console.log("")
+    console.log("You make your way back to your chambers and through the small dank passageway")
+    console.log(`to your summoning shrine, placing ${move.tomeName} on the altar plinth.` )
+    console.log(`You summon your ${demonName(demon)} and inform it of its task.  It is displeased.`)
+    console.log("")
+    console.log("Reading from the book, you go about the arduos task of teaching the Demon")
+    console.log(`${move.name}, using binding spells and other incantations to ensure the `)
+    console.log("creatures subservience.")
+    console.log("")
+    console.log("It is a great effort, and you feel drained of energy, and your Demon is")
+    console.log(`seething (as usual).  But the deed is done and you dismiss ${demonName(demon)}`)
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "moveBeingTaught2",
+            message: "Enter to continue..."
+        }
+    ])
+    .then (answers => {
+
+        if (answers.moveBeingTaught2 === "") {
+
+            moveBeingTaught3(GS, demon, move)
+        }
+
+        else if (answers.moveBeingTaught2 !== "") {
+
+            moveBeingTaught2(GS, demon, move)
+        }
+    })
+}
+
+function moveBeingTaught3 (GS, demon, move)  {
+
+    consoleClear(GS)
+
+    console.log("")
+    console.log(`Your energy spent, you close ${move.tomeName} and stand for a moment, enjoying` )
+    console.log(`the eerie peace of your shrine now that your ${demonName(demon)} has been` )
+    console.log(`desummoned, and the constant, chaotic racket of void wind and dark magic has `)
+    console.log("ceased.  You collect yourself and hurriedly head back to the library to drop")
+    console.log("off the book in the library mailbox, hopefully sparing yourself the indignity")
+    console.log(`of another pitiful, sanctimonious lecture from the volume's keeper.`)
+    console.log("")
+    console.log("You walk back to your quarters and collapse into your armchair.")
+    console.log("")
+    console.log(``)
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "moveBeingTaught3",
+            message: "Enter to continue..."
+        }
+    ])
+    .then (answers => {
+
+        if (answers.moveBeingTaught3 === "") {
+
+            moveTaughtContinue(GS, demon, move)
+        }
+
+        else if (answers.moveBeingTaught3 !== "") {
+
+            moveBeingTaught3(GS, demon, move)
+        }
+    })
+}
 
 
 
@@ -4471,7 +4666,7 @@ let enemyDefeatMessage = "none"
 let pWI = []   // player Demon inventory
 let items = []
 let enemy = {}   // enemy Demon inventory
-let soulEnergy = 0
+let soulEnergy = 10000
 let enemyBonusSoulEnergy = 0
 
 
@@ -4819,13 +5014,6 @@ launcher(gameState)
 /// TODO NEXT
 
 /*
-Make it so that demons cannot learn a move twice.
-
-Make it so that books cost soul energy to teach 
-
-Make it so that teaching a demon a move takes actual time and stuff
-
-Make it so that the librarian says something like - make sure that book is returned by sunrise.  If not you will never step foot in here again.
 
 
 */
