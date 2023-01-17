@@ -864,7 +864,7 @@ function teachableDemonsMenu (GS, move, bookViewerSelectionIndex) { // Menu for 
     })
 }
 
-function teachMoveMenu (GS, move, demon, bookViewerSelectionIndex) {
+function teachMoveMenu (GS, move, demon, bookViewerSelectionIndex) {  // menu for selecting move slot for new move
 
     consoleClear(GS)
 
@@ -905,7 +905,7 @@ function teachMoveMenu (GS, move, demon, bookViewerSelectionIndex) {
     })
 }
 
-function confirmTeachMove(GS, move, demon, bookViewerSelectionIndex, teachMoveMenuSelectionIndex) {
+function confirmTeachMove(GS, move, demon, bookViewerSelectionIndex, teachMoveMenuSelectionIndex) {  // enter to confrim user wants to teach move
 
     consoleClear(GS)
 
@@ -962,9 +962,7 @@ function confirmTeachMove(GS, move, demon, bookViewerSelectionIndex, teachMoveMe
 
 }
 
-
-
-function moveTaughtContinue (GS, demon, move) {
+function moveTaughtContinue (GS, demon, move) {  // continue for move taught.  Also advances time and takes soul energy
 
     consoleClear(GS)
     displayDemonMoves(demon)
@@ -1385,7 +1383,7 @@ function demonViewerMenu (GS, selection) {  // prompt and conditional logic for 
 
 }
 
-function demonMovesMenu (GS, demon, selection) {
+function demonMovesMenu (GS, demon, selection) {  // displays moves of slected demon
 
     consoleClear(GS)
 
@@ -4236,6 +4234,104 @@ function iDGenerator (iDList) {  // generates a new ID for every Demon BUT I've 
 
 }
 
+function statGen (factor, level) {  // Used in demon constructors to scale each stat to level with +/- 10% variance
+
+
+    let result = 0
+
+    let base = factor * level
+
+    result += base
+
+    result +=(((base) / 10) * Math.random())
+
+    result -= (((base) / 10) * Math.random())
+
+    if (result > 100) {
+        result = 100
+
+    } else if (result < 0) {
+        result = 0
+    }
+
+    return Math.round(result)
+}
+
+function moveGen (level, species) {  // Used in demon constructors to generate the move list for each demon.  Depends on level and species
+
+    let moveSlotsLevel = Math.floor (((level - 5)/ 5))  // get the number of extra moves on top of the one minimum
+
+    let possibleMoves = []   // array for all the moves which contain demon name in the canTeach array
+
+    let knownMoves = []    // result
+
+    let knownMoveNames = []         // used for comparison later on to stop moves being added twice
+
+    for (let i of Object.keys(MOVES)) {           // makes list of all teachable moves
+        if (MOVES[i].canLearn.includes(species)) {
+
+            possibleMoves.push(MOVES[i])
+
+        }
+    }
+
+    // this bit adds the first move 
+
+    let firstSelected = possibleMoves[[Math.floor(Math.random() * possibleMoves.length)]]
+    knownMoves.push(firstSelected)
+    knownMoveNames.push(firstSelected.name)
+
+
+
+    for (let i = 0; i < moveSlotsLevel && i < 3 && i < (possibleMoves.length - 1); i ++) {  // loops up to three more times adding moves
+
+        let nextSelectedMove = (possibleMoves[[Math.floor(Math.random() * possibleMoves.length)]])
+
+        if (!(knownMoveNames.includes(nextSelectedMove.name))) {               // as long as the moves havent already been added
+
+            knownMoves.push(nextSelectedMove)
+            knownMoveNames.push(nextSelectedMove.name)
+        }
+
+        else if (knownMoveNames.includes(nextSelectedMove.name)) {  // if move was already added, do another loop and don't count this one
+
+            i --
+        }
+    }
+
+    let emptyObjectsToAdd = 4 - knownMoves.length
+
+    for (let i = 0; i < emptyObjectsToAdd; i ++) {   // adds empty objects up to four
+
+        knownMoves.push({})
+    }
+
+
+
+    return knownMoves
+
+}
+
+function ppGen (knownMoves) {  // Used in demon constructors to set the pp of each move (to the maximum)
+
+    let result = []
+
+    for (let i of knownMoves) {
+
+        if (Object.keys(i).length > 0) {
+
+            result.push(i.maxPP)
+
+
+
+        } else {
+            result.push(0)
+        }
+    }
+
+    return result
+}
+
 
 
 //// Tutorials / message chains
@@ -4860,6 +4956,33 @@ const MOVES = {
     },
 }
 
+
+
+//// Demon constructors
+
+const demonConstructors = {
+    
+    Imp : class {
+        constructor(level) {
+            this.id = iDGenerator(iDList)
+            this.nickName = "none"
+            this.active = "true"
+            this.type = "destruction"
+            this.genus = "Imp"
+            this.species = "Imp"
+            this.maxHP = (level * 20) 
+            this.hP = this.maxHP
+            this.level = level
+            this.xp = 0
+            this.str = statGen (1.3, level)
+            this.agi = statGen (2, level)
+            this.def = statGen (1, level)
+            this.pow = statGen (3, level)
+            this.knownMoves = moveGen(level, this.species)
+            this.movePP = ppGen(this.knownMoves)
+        }
+    }
+}
 
 
 //// Library Inventory
