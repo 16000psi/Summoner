@@ -167,6 +167,10 @@ function mainMenu (GS) {
     let libraryAvailable = false
     let libraryAccessMessage = "mainMenu() says: I'm broken.  Something about the time or library access logic is wrong."
 
+    let summoningShrineAvailable = true
+    let summoningShrineAccessMessage = "mainMenu() says: I'm broken.  Something about the time or summoning shrine access logic is wrong."
+
+
 
     if (GS.time >= 5 && GS.time < 7) {
 
@@ -175,6 +179,13 @@ function mainMenu (GS) {
         sleepAvailableMessage = "It is getting late.\nTo sleep, enter S. "
 
         libraryAccessMessage = "\nThe library is closed at this hour."
+
+        if (GS.time >= 6) {  // if it is 12am or 3am.
+
+            summoningShrineAvailable = false
+            summoningShrineAccessMessage = "It's too late to use the shrine now.  You will wake up your neighbours with the noise."
+
+        }
 
         
         
@@ -204,7 +215,7 @@ function mainMenu (GS) {
 
     ///
 
-    let menuMessage = sleepAvailableMessage + "To view your Demons, enter A. To go to the Library, enter L"
+    let menuMessage = sleepAvailableMessage + "To view your Demons, enter A. To go to the Library, enter L.\n To use your summoning shrine, enter U."
 
 
     inquirer
@@ -244,6 +255,24 @@ function mainMenu (GS) {
             }
         }
 
+        else if (answers.mainMenu.toUpperCase() === "U") {
+
+            if (summoningShrineAvailable) {
+
+                enteringSummoningShrine (GS)
+
+
+            }
+
+            else if (!(summoningShrineAvailable)) {
+
+                GS.displayAccessError = summoningShrineAccessMessage
+
+
+                mainMenu(GS)
+            }
+        }
+
         else if (answers.mainMenu.toUpperCase() === "S") {  // go to sleep
 
             if (sleepAvailable) {   // if correct time of day, initiate sleep
@@ -279,6 +308,7 @@ function mainMenu (GS) {
         }
     })
 }
+
 
 //// Time and Sleep functions
 
@@ -1175,6 +1205,120 @@ function refreshLibraryInventory (GS) {  // returns an array of three moves (boo
     return resultNewInventory
 
 
+}
+
+
+////// Summoning Shrine Functions
+
+function enteringSummoningShrine (GS) {
+
+    if (GS.playerHasAccessedSummoningShrine === false) {
+
+        summoningShrineIntroduction1 (GS)
+
+        return
+        
+    }
+
+    consoleClear(GS)
+
+    console.log("")
+    console.log("You walk through the small passageway and enter your summoning shrine.")
+    console.log("")
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "enteringSummoningShrine",
+            message: "Enter to continue..."
+        }
+    ])
+
+    .then (answers => {
+
+        if (answers.enteringSummoningShrine === "") {
+
+            summoningShrineMenu(GS)
+        }
+        else if (answers.enteringSummoningShrine !== "") {
+
+            enteringSummoningShrine(GS)
+        }
+    })
+}
+
+function summoningShrineMenu (GS) {
+
+    consoleClear(GS)
+    console.log(`-  ${GS.playerName.toUpperCase()}'s SUMMONING SHRINE  -`)
+    console.log("")
+    console.log("You stand at the summoning altar.  You can feel a latent energy eminating from the runed slab.")
+    console.log("")
+    console.log("What would you like to do?")
+    console.log("")
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "summoningShrineMenu",
+            message: "Enter R to view known rituals. Enter X to exit"
+
+        }
+    ])
+
+    .then (answers => {
+
+        if (answers.summoningShrineMenu.toUpperCase() === "R") {
+
+            ritualsMenu (GS)
+
+            
+        }
+
+        else if (answers.summoningShrineMenu.toUpperCase() === "X") {
+
+            leaveSummoningShrine(GS)
+        }
+
+        else if (answers.summoningShrineMenu.toUpperCase() !== "R" &&
+        answers.summoningShrineMenu.toUpperCase() !== "X") {
+
+            summoningShrineMenu (GS)
+
+
+        }
+    })
+}
+
+function leaveSummoningShrine (GS) {
+
+    consoleClear(GS)
+
+    console.log("")
+    console.log("You exit your summoning shrine through the crumbling passageway and go back to your chambers.")
+    console.log("")
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "leaveSummoningShrine",
+            message: "Enter to continue..."
+        }
+    ])
+    .then (answers => {
+
+        if (answers.leaveSummoningShrine === "") {
+
+            mainMenu(GS)
+        }
+        else if (answers.leaveSummoningShrine !== "") {
+
+            leaveSummoningShrine(GS)
+        }
+    })
 }
 
 
@@ -4785,6 +4929,160 @@ function moveBeingTaught3 (GS, demon, move)  {
     })
 }
 
+function summoningShrineIntroduction1 (GS) { // the first time the player enters their shrine
+
+    consoleClear(GS)
+
+    console.log("")
+    console.log("You enter the cramped, damp passage next to the bookcase in your chambers and ")
+    console.log("make your way through.  The small corridoor is barely big enough to stand up in")
+    console.log("and seems to have been through many cycles of destruction and repair, with a ,")
+    console.log("noticably hodgepodge assortment of wooden beams, bricks, boulders and cobwebs")
+    console.log("supporting the ancient ceiling.  After a few feet you come to the opening of ")
+    console.log("your shrine room, a medium sized hexagonal chamber which feels more like the ")
+    console.log("site of a baptism - or sacrifice - than something which should be a few meters")
+    console.log("from where you are meant to sleep at night.  ")
+    console.log("")
+    console.log("")
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "summoningShrineIntroduction1",
+            message: "Enter to continue..."
+        }
+    ])
+    .then (answers => {
+
+        if (answers.summoningShrineIntroduction1 === "") {
+
+            summoningShrineIntroduction2(GS)
+        }
+
+        else if (answers.summoningShrineIntroduction1 !== "") {
+
+            summoningShrineIntroduction1(GS)
+        }
+    })
+}
+
+function summoningShrineIntroduction2 (GS) {
+
+    consoleClear(GS)
+
+    console.log("")
+    console.log("The walls of the shrine room are made of large, old stone bricks which have been")
+    console.log("chipped and eroded as if by a great storm. In the centre of the floor is a hexagonal")
+    console.log("slab of solid stone, covered in faded burn marks and subtle tide lines of fine soot,")
+    console.log("most likely the remnants of when it was last used. The floor has several large ")
+    console.log("geometric shapes and beautiful symbols carved into it. This appears to have been")
+    console.log("done many decades ago with great care, and you can still see stubborn flecks of")
+    console.log("gold paint in the markings that have refused to weather after years of exposure to")
+    console.log("the winds of dark magic. You recognise these shapes and symbols as being summoning")
+    console.log("runes, deliniating different rules of binding and the connection between summoner")
+    console.log("and void.")
+    inquirer
+    .prompt
+    ([
+        {
+            name: "summoningShrineIntroduction2",
+            message: "Enter to continue..."
+        }
+    ])
+    .then (answers => {
+
+        if (answers.summoningShrineIntroduction2 === "") {
+
+            summoningShrineIntroduction3(GS)
+        }
+
+        else if (answers.summoningShrineIntroduction2 !== "") {
+
+            summoningShrineIntroduction2(GS)
+        }
+    })
+}
+
+function summoningShrineIntroduction3 (GS) {
+
+    consoleClear(GS)
+
+    console.log("")
+    console.log("Facing the center of the room, and the centre of the runed stone slab, is a wooden")
+    console.log("altar.  This altar is intended for books to be read aloud from, a Summoner's altar.")
+    console.log("You stand behind it and imagine all the accolytes who have ever stood behind an")
+    console.log("altar just like the one before you, only to be killed within a few days by a creature")
+    console.log("they had conjoured or a spell gone awry.  You're not superstitious, but something")
+    console.log("is telling you with absolute certainty that if you were to die in this exact room")
+    console.log("by that fate, you will not have been the only one, or even the only recent one.")
+    console.log("")
+    console.log("SUMMONING enabled.  Perform RITUALS at the altar to summon Demons to dominate and")
+    console.log("subserviate.")
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "summoningShrineIntroduction3",
+            message: "Enter to continue..."
+        }
+    ])
+    .then (answers => {
+
+        if (answers.summoningShrineIntroduction3 === "") {
+
+            summoningShrineIntroduction4(GS)
+        }
+
+        else if (answers.summoningShrineIntroduction3 !== "") {
+
+            summoningShrineIntroduction3(GS)
+        }
+    })
+}
+
+function summoningShrineIntroduction4 (GS) {  // sets playeraccessed shrine to true
+
+    consoleClear(GS)
+
+    console.log("")
+    console.log("The more powerful you become, the more involved and dangerous the rituals you will")
+    console.log("learn. More powerful rituals will summon Demons of a higher LEVEL.")
+    console.log("")
+    console.log("Creatures summoned here can be fought and their mortal forms destroyed in order to ")
+    console.log("train your other Demons, or they can be bound to serve you using SOULSTONE FRAGMENTS.")
+    console.log("Demons will do everything in their power to avoid the service of morals, and must")
+    console.log("be weakened before this is attempted if you are to succeed. Increase your power level")
+    console.log("to capture more powerful Demons.")
+    console.log("")
+    console.log("")
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "summoningShrineIntroduction4",
+            message: "Good luck accolyte. Enter to continue..."
+        }
+    ])
+    .then (answers => {
+
+        if (answers.summoningShrineIntroduction4 === "") {
+
+            GS.playerHasAccessedSummoningShrine = true
+
+            summoningShrineMenu (GS)
+        }
+
+        else if (answers.summoningShrineIntroduction4 !== "") {
+
+            summoningShrineIntroduction4(GS)
+        }
+    })
+}
+
+
 
 
 
@@ -4805,7 +5103,11 @@ function moveBeingTaught3 (GS, demon, move)  {
 
 //////////// Data Zone 
 
-let playerHasAccessedLibrary = true // if false, will display library tutorial first. 
+let playerLevel = 0
+
+let playerHasAccessedSummoningShrine = false  // if false, will display the summoning shrine tutorial first
+
+let playerHasAccessedLibrary = true // if false, will display library intro first. 
 let libraryAccessEnabled = true   // if the player can use the library
 let day = 1
 let time = 1
@@ -4961,7 +5263,7 @@ const MOVES = {
 //// Demon constructors
 
 const demonConstructors = {
-    
+
     Imp : class {
         constructor(level) {
             this.id = iDGenerator(iDList)
@@ -5159,7 +5461,8 @@ if ((debugMode) && (debugModeChangesEnemyInventory)) { // If change enemy inv de
 
 
 let gameState = {pWI, items, enemy, playerName, soulEnergy, day, time, displayAccessError,
-     playerHasAccessedLibrary, libraryAccessEnabled, libraryInventory}    // Creates gamestate object (becomes GS in arguments).  Contains all modifiable data that the game must keep track of.
+    playerHasAccessedLibrary, libraryAccessEnabled, libraryInventory, playerHasAccessedSummoningShrine,
+    playerLevel}    // Creates gamestate object (becomes GS in arguments).  Contains all modifiable data that the game must keep track of.
 
 
 ////
