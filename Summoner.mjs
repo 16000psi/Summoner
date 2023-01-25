@@ -1272,6 +1272,8 @@ function summoningShrineMenu (GS) {
 
         if (answers.summoningShrineMenu.toUpperCase() === "R") {
 
+            ritualsDisplay(GS)
+
             ritualsMenu (GS)
 
             
@@ -1320,6 +1322,548 @@ function leaveSummoningShrine (GS) {
         }
     })
 }
+
+function ritualsDisplay (GS) {
+
+
+    let ritualsLearned = true
+
+    consoleClear(GS)
+
+    console.log("-             RITUALS             -")
+    console.log("")
+
+    for (let i = 0; i < 7; i ++) {
+
+
+
+        if (i < GS.playerLevel) {
+
+            switch (i) {
+                case 0: 
+
+                    if (GS.playerLevel < 2) {
+
+                        console.log("")
+                        console.log("You have not learned any rituals yet.")
+                        console.log("")
+
+                        ritualsLearned = false
+
+
+
+                    }
+
+                    break;
+
+                case 1:
+
+                    console.log("Ritual of Night        -    lvl 1-5")
+                    console.log("")
+
+
+
+                    break;
+                
+                case 2:
+
+                    console.log("Ritual of Blood        -   lvl 5-10")
+                    console.log("")
+
+
+
+                    break;
+
+                case 3:
+
+                    console.log("Arcane Ritual          -  lvl 10-15")
+                    console.log("")
+
+
+
+                    break;
+                
+                case 4:
+
+                    console.log("Void Rite Incantations -  lvl 15-20")
+                    console.log("")
+
+
+
+                    break;
+
+                case 5:
+
+                    console.log("Akmaninov's Ritual     -  lvl 20-25")
+                    console.log("")
+
+
+                    break;
+
+                case 6:
+
+                    console.log("Ritual of Souls        -  lvl 25-30")
+                    console.log("")
+
+
+                    break;
+                
+            }
+
+        }
+
+        else if (i >= GS.playerLevel){
+
+            if (ritualsLearned === true) {
+
+                console.log("- - - - - UNKNOWN RITUAL - - - - -")
+                console.log("")
+
+            }
+        }
+
+    }
+
+
+}
+
+function ritualsMenu (GS) {
+
+    let menuMessage = "ritualsMenu Error"
+
+
+    for (let i = 0; i < 7; i ++) {
+
+
+
+        if (i < GS.playerLevel) {
+
+            switch (i) {
+                case 0: 
+
+                    if (GS.playerLevel < 2) {
+
+                        ritualsLearned = false
+
+                        menuMessage = "Enter X to exit..."
+
+                    }
+
+                    break;
+
+                case 1:
+
+
+                    menuMessage = "Enter 1 to select a ritual or X to exit."
+
+                    break;
+                
+                case 2:
+
+
+                    menuMessage = "Enter 1-2 to select a ritual or X to exit."
+
+                    break;
+
+                case 3:
+
+
+                    menuMessage = "Enter 1-3 to select a ritual or X to exit."
+
+                    break;
+                
+                case 4:
+
+
+
+                    menuMessage = "Enter 1-4 to select a ritual or X to exit."
+
+                    break;
+
+                case 5:
+
+
+                    menuMessage = "Enter 1-5 to select a ritual or X to exit."
+
+                    break;
+
+                case 6:
+
+
+                    menuMessage = "Enter 1-6 to select a ritual or X to exit."
+
+                    break;
+                
+            }
+
+        }
+
+
+    }
+
+    if (displayAccessError !== "none") {
+
+        console.log("")
+        console.log(displayAccessError)
+        console.log("")
+
+        displayAccessError = "none"
+
+    }
+
+
+    
+
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "ritualsMenu",
+            message: menuMessage
+        }
+    ])
+    .then (answers => {
+        
+        if (answers.ritualsMenu === "1" || answers.ritualsMenu === "2" || answers.ritualsMenu === "3" || 
+        answers.ritualsMenu === "4" || answers.ritualsMenu === "5" || answers.ritualsMenu === "6") {
+
+            if (parseInt(answers.ritualsMenu) <= (GS.playerLevel - 1)) {
+
+                let selection = parseInt(answers.ritualsMenu)
+
+                ritualsDisplay(GS)
+                ritualConfirm(GS, selection)
+            }
+
+            else if (parseInt(answers.ritualsMenu) > (GS.playerLevel - 1)) {
+
+                displayAccessError = "You must select a known ritual."
+
+                ritualsDisplay(GS)
+                ritualsMenu(GS)
+                return
+            }
+        }
+
+        else if (answers.ritualsMenu.toUpperCase() === "X") {
+
+            summoningShrineMenu(GS)
+        }
+
+        else if (answers.ritualsMenu !== "1" && answers.ritualsMenu !== "2" && answers.ritualsMenu !== "3" && 
+        answers.ritualsMenu !== "4" && answers.ritualsMenu !== "5" && answers.ritualsMenu !== "6" && answers.ritualsMenu.toUpperCase() !== "X") {
+
+            ritualsDisplay(GS)
+            ritualsMenu(GS)
+        }
+    })
+
+}
+
+function ritualConfirm (GS, ritualsMenuSelection) {
+
+
+    switch (ritualsMenuSelection) {
+
+        case 1:
+
+            console.log("Do you want to perform the Ritual of Night?")
+            console.log("This simple ritual will take a small ammount of time")
+            console.log("")
+
+            break;
+        
+        case 2:
+
+            console.log("Do you want to perform the Ritual of Blood?")
+            console.log("This simple ritual will take a small ammount of time")
+            console.log("")
+
+
+            break;
+
+        case 3:
+
+            console.log("Do you want to perform the Arcane Ritual?")
+            console.log("This simple ritual will take a small ammount of time")
+            console.log("")
+
+            break;
+
+        case 4:
+
+            console.log("Do you want to perform the Void Rite Incantations?")
+            console.log("This is a complex ritual and will take more time.")
+            console.log("")
+            break;
+
+        case 5:
+
+            console.log("Do you want to perform Akmaninov's Ritual?")
+            console.log("This is a complex ritual and will take more time.")
+            console.log("")
+
+            break;
+
+        case 6:
+
+            console.log("Do you want to perform the Ritual of Souls?")
+            console.log("This is a complex ritual and will take more time.")
+            console.log("")
+
+            break;
+    }
+
+    inquirer
+    .prompt([
+        {
+            name: "ritualConfirm",
+            message: "Enter Y to perform the ritual or X to cancel."
+        }
+    ])
+
+    .then (answers => {
+        
+        if (answers.ritualConfirm.toUpperCase() === "Y") {
+
+            ritualLauncher (GS, ritualsMenuSelection)
+
+
+        }
+
+        else if (answers.ritualConfirm.toUpperCase() === "X") {
+
+            ritualsDisplay(GS)
+            ritualsMenu(GS)
+
+        }
+        else if (answers.ritualConfirm.toUpperCase() !== "Y" && answers.ritualConfirm.toUpperCase() !== "X") {
+
+            ritualsDisplay(GS)
+            ritualConfirm(GS, ritualsMenuSelection)
+        }
+    })
+
+
+}
+
+function ritualDemonSummon (ritualsMenuSelection) {
+
+
+    let levelAddition = Math.round(Math.random() * 5)
+    let demonLevel = ((ritualsMenuSelection - 1) * 5) + levelAddition
+
+    let demonsArray = [new demonConstructors.Imp(demonLevel)]       // add constructors here
+
+    return demonsArray[Math.floor(Math.random() * demonsArray.length)]
+
+    
+}
+
+function ritualLauncher (GS, ritualsMenuSelection) {
+
+    let ritualSummonedDemon = ritualDemonSummon(ritualsMenuSelection)
+
+    consoleClear(GS)
+
+    switch(ritualsMenuSelection) {
+
+        case 1:
+            ritualText1(ritualSummonedDemon)
+            GS.time ++
+            break;
+
+        case 2:
+            ritualText2(ritualSummonedDemon)
+            GS.time ++
+            break;
+
+        case 3:
+            ritualText3(ritualSummonedDemon)
+            GS.time ++
+            break;
+
+        case 4:
+            ritualText4(ritualSummonedDemon)
+            GS.time += 2
+            break;
+
+        case 5:
+            ritualText5(ritualSummonedDemon)
+            GS.time += 2
+            break;
+            
+        case 6:
+            ritualText6(ritualSummonedDemon)
+            GS.time += 2
+            break;
+    }
+
+    console.log(`You summon your ${demonName(playerActiveDemonLoader)} from its soulstone fragment and prepare to fight.`)
+
+    inquirer
+    .prompt
+    ([
+        {
+            name: "ritualLauncher",
+            message:"Enter to continue..."
+        }
+    ])
+    .then (answers => {
+
+        if (answers.ritualLauncher === "") {
+
+            GS.enemy.enemyName = "none"
+
+            GS.enemy.eWI = [ritualSummonedDemon, {}, {}, {}, {}, {}]
+
+            GS.enemy.enemyBonusSoulEnergy = 0
+
+            GS.enemy.enemyIntroMessage = ritualSummonedDemon.introMessage
+
+
+       
+
+            battleIntro (GS)
+
+            
+
+
+        }
+
+        else if (answers.ritualLauncher !== "") {
+
+            ritualLauncher (GS, ritualsMenuSelection)
+
+        }
+    })
+}
+
+
+
+function ritualText1 (ritualSummonedDemon) {
+
+    console.log("")
+    console.log("You rest upon your alter a book dictating the procedures of the Ritual of Night.")
+    console.log("Preparing for the ritual, you inscribe several small runes around the chamber using")
+    console.log("fragrant burnt wood, and set alight to a handful of dried herbs you have placed")
+    console.log("in a small metal goblet in the centre of the floor. You begin your incantations,")
+    console.log("and chant the words of the ritual.  Slowly a draft forms in the chamber, which")
+    console.log("grows into a strong wind as you form a portal to the void, taking care to control")
+    console.log("and steady the flow of magic.  Light eminates from the void, and you hear a creature")
+    console.log("screaming angrily as it is pulled into the mortal realm. The ritual is complete,")
+    console.log(`and before you, bound to the summoning circle, is a LEVEL ${ritualSummonedDemon.level} ${ritualSummonedDemon.species.toUpperCase()}.`)
+    console.log("")
+
+}
+
+function ritualText2 (ritualSummonedDemon) {
+
+    console.log("")
+    console.log("You rest upon your alter a book dictating the procedures of the Ritual of Night.")
+    console.log("Preparing for the ritual, you use a small blade to cut your hand, allowing drops")
+    console.log("of blood to fall into the centre of the summoning circle. As the ritual dictates,")
+    console.log("you stand behind your altar and clench your injured hand into a fist, raising it ")
+    console.log("before your eyes as you recite from memory the various spells of the ritual. After")
+    console.log("some time, the blood running down your arm begins to glow and you feel it brurning ")
+    console.log("your skin. The sound of the void howling fills the chamber and you hear several")
+    console.log("cracks of echoing thunder from within the void. Suddenly, with a flash of light, ")
+    console.log(`your blood evaporates and you lower your fist, revealing a LEVEL ${ritualSummonedDemon.level} ${ritualSummonedDemon.species.toUpperCase()}.`)
+    console.log("")
+}
+
+function ritualText3 (ritualSummonedDemon) {
+
+    console.log("")
+    console.log("You rest upon your alter a book dictating the procedures of the Arcane Ritual.")
+    console.log("Preparing for the ritual, you place several small enchanted trinkets at specific ")
+    console.log("points in the rune circle, and after adjusting their positions finely, stand behind ")
+    console.log("your summoning altar. Reading aloud carefuly the complex, almost algerbraic text,")
+    console.log("the trinkets start to vibrate and a strange glow fills the chamber with no obvious")
+    console.log("source.  The trinkets dance vigorously across the circle, to meet violently in")
+    console.log("the middle before stopping dead. There is a brief pause, and then the strange glow")
+    console.log("seems to somehow converge impossibly into one tiny point several feet above the")
+    console.log(`trinkets.  Suddenly, the point explodes in a chaotic cloud of dust and bright `)
+    console.log(`green light.  As the dust settles, you see that a LEVEL ${ritualSummonedDemon.level} ${ritualSummonedDemon.species.toUpperCase()}.`)
+    console.log("is trapped in the runed circle.")
+    console.log("")
+}
+
+function ritualText4 (ritualSummonedDemon) {
+
+    console.log("")
+    console.log("You rest upon your alter a book dictating the procedures of the Void Rite ")
+    console.log("Incantations. Preparing for the ritual, you quench the chamber's torches and read ")
+    console.log("from the tome by candlelight.  You read for a long time, and as you proceed, your")
+    console.log("voice seems to get quieter and quieter, and the candlelight seems to dim. After a")
+    console.log("while, you find that you cannot see the words on the page or hear yourself speak")
+    console.log("them, yet you are aware that you are still reading. You lose track of time and your")
+    console.log("sense of self wanes, until you are unaware of the passing of time or even your own")
+    console.log("thoughts. In your minds eye you begin to see a creature, howing and thrashing,")
+    console.log(`and seconds later this is as vivid as daylight, and you are clawing and grabbing`)
+    console.log(`this creature, a ${ritualSummonedDemon.species}, as it fights desperately against you in disgust.`)
+    console.log("You manage to get a grip on part of its form, and then you feel the world caving ")
+    console.log("in. You open your eyes and you are lying against the wall of the Summoning chamber,")
+    console.log(`and before you, bound by magic in the rune circle, is a LEVEL ${ritualSummonedDemon.level} ${ritualSummonedDemon.species.toUpperCase()}.`)
+    console.log("")
+}
+
+function ritualText5 (ritualSummonedDemon) {
+
+    console.log("")
+    console.log("You rest upon your alter a book dictating the procedures of Akmaninov's Ritual. ")
+    console.log("Preparing for the ritual, you place a small metal spinning top in the centre of")
+    console.log("the summoning circle and set it spinning, before running back hurriedly to your")
+    console.log("altar and reciting the ritual carefully. Once the ritual has started, the tome")
+    console.log("tells you, to allow the top to stop spinning would be a grave and probably fatal")
+    console.log("error.  Whilst chanting and staring intensely at the spinning top, you feel your  ")
+    console.log("words, very slowly, causing it to spin ever faster. The ritual is long, and after")
+    console.log("a while you carelessly mispronounce a word from the text, and you noice, immediately,")
+    console.log(`that the spinning top wobbles. With renewed concentration you press on. The top is `)
+    console.log(`is spinning impossibly fast, and you feel an unnatural wind swirl around the room,`)
+    console.log("pushing dust into your eyes and your throat. After several minutes the wind becomes")
+    console.log("so powerful that it is taking most of your books with it, and you are struggling to ")
+    console.log("even stand up, never mind read from the ritual text.  The howling sound of the wind")
+    console.log("crescendos into a piercing shreek, and you feel the ground shake as the spinning top")
+    console.log("suddenly stops dead, but remains standing.  The shockwave causes dust to fall from")
+    console.log("the ceiling, and the shreeking noise grows more defined and loud.  You see the void")
+    console.log("open before you, and at that moment the spinning top finally falls. Standing above")
+    console.log(`the metal spinning top is a LEVEL ${ritualSummonedDemon.level} ${ritualSummonedDemon.species.toUpperCase()}.`)
+    console.log("")
+}
+
+function ritualText6 (ritualSummonedDemon) {
+
+    console.log("")
+    console.log("You rest upon your alter a book dictating the procedures of the Ritual of souls. ")
+    console.log("Preparing for the ritual, carefully arrange several small wooden statues you have")
+    console.log("ammatuerishly carved around the room, and draw a dozen or so large runes around")
+    console.log("the walls of the room in bright white chalk. Each rune you draw must be imbued")
+    console.log("with void energy via several smaller individual rituals listed in the text. Once")
+    console.log("that is complete, you arrange several bunches of fragrant herbs in the room and")
+    console.log("tidy up a little. It is then time to begin the main ritual, a drawn out incantation")
+    console.log("made up of spells from different ancient arcane languages. For the entirity of the")
+    console.log(`ritual, nothing happens, and would be forgiven for thinking that the ritual hadn't `)
+    console.log(`worked. Several minutes pass after you finish reading and you stand silently behind`)
+    console.log("the altar. You become aware of faint scratching and knocking sounds that seem to")
+    console.log("eminate from behind the stone walls of the chamber, which grow ever louder. A dark,")
+    console.log("opaque liquid begins to seep up through the floor, and as it touches your feet you")
+    console.log("feel that it is colder than ice. The liquid slowly covers the floor, and the statues")
+    console.log("you placed around begin to float in it. The banging sounds become unbearably loud,")
+    console.log("and are joined by the sound of ghastly screams and cries of pain. The liquid is now")
+    console.log("gushing in from every crack and pore of the walls, and rising quickly. Before long")
+    console.log(`amidst the screams and the sound of gushing water, the runes begin to flicker with`)
+    console.log("a faint light, and the room begins to shake. Suddenly, the liquid begins to swirl")
+    console.log("in the middle of the room in a whirlpool, and the dolls circle the widening hole")
+    console.log("until they are swallowed up. The liquid gushes though this widening void in the")
+    console.log("floor, and as it clears you are given a glimpse into the void as a creature")
+    console.log("lambers up through what would usually constitute the chamber floor. The sound of ")
+    console.log("the void is unbearably loud, but suddenly the portal is closed, the sounds stop,")
+    console.log(`the runes stop glowing, and what stands before you is a LEVEL ${ritualSummonedDemon.level} ${ritualSummonedDemon.species.toUpperCase()}.`)
+    console.log("")
+}
+
 
 
 
@@ -1900,7 +2444,7 @@ function battleIntro (GS) { // Intro splash to battle mode with logic for extrac
         consoleClear(GS)
 
         console.log("")
-        console.log(`${findEnemyName(GS)} wants to fight your tennants!`)
+        console.log(`Summoned ${findEnemyName(GS)} has been pulled from the void!`)
         console.log("")
 
     }
@@ -1922,7 +2466,7 @@ function battleIntro (GS) { // Intro splash to battle mode with logic for extrac
                 consoleClear(GS)
 
                 console.log("")
-                console.log(`${enemyName}: ${enemyIntroMessage}`)
+                console.log(`${GS.enemy.enemyName}: ${enemyIntroMessage}`)
                 console.log("")
 
                 
@@ -2550,11 +3094,10 @@ function attackPossibleTester (Demon) { // sees if Demon has any available pp fo
 function findEnemyName (GS) {  // function which returns enemy name if enemy has name, if not then looks at eWI  
                                      // and takes the nickname of the last Demon (if there is no nickname then just takes species)
                                     // and returns it.
-
     let result = ""
 
-    if (enemyName !== "none") {    // if enemy has a name just return that
-        return enemyName
+    if (GS.enemy.enemyName !== "none") {    // if enemy has a name just return that
+        return GS.enemy.enemyName
     }
 
     for (let i in GS.enemy.eWI) {                   // iterates through the enemy inventory
@@ -3539,14 +4082,14 @@ function demonDiedDisplay (GS, attacker, defender) { // Displays info about Demo
 
     if (defender.hP === 0) {
 
-        console.log(`Defending ${demonName(defender)} has been knocked out`)
+        console.log(`Defending ${demonName(defender)} has been defeated.`)
 
     }
 
 
     if (attacker.hP === 0) {
 
-        console.log(`Attacking ${demonName(attacker)} has been knocked out.`)
+        console.log(`Attacking ${demonName(attacker)} has been defeated out.`)
 
     }
 
@@ -3998,7 +4541,7 @@ function xPDistributorMenu (GS, xpDistributionArray) {  // lists demons xp gain 
 
             else {
 
-                soulEnergyMenu(soulEnergyCalculator (GS))
+                soulEnergyMenu(GS, soulEnergyCalculator (GS))
             }
 
 
@@ -4091,7 +4634,6 @@ function levelUpMenu (GS, levelsGainedArray) {  // menu for if something levelle
 
             let isevolution = (evolvedTester(GS, levelsGainedArray))   // checks if an evolution has occurred
 
-            console.log(isevolution)
 
             if (isevolution) {   // if evolution did occurr go to that menu
 
@@ -4184,6 +4726,7 @@ function evolvedMenu (GS, levelsGainedArray) { // UNFINISHED
 
 function soulEnergyCalculator (GS) { // Calculated the ammount of soul energy the player gains from the battle
 
+
     let result = 0
 
 
@@ -4221,7 +4764,10 @@ function soulEnergyMenu (GS, soulEnergyAmmount) { // Displays the soul energy ga
         }
     ])
     .then (answers => {
+        
         if (answers.soulEnergyMenu === "") {  // ADD END OF BATTLE WON THINGS HERE e.g. time of day change, story point increase
+
+            console.log(GS)
 
             GS.soulEnergy += soulEnergyAmmount  // updated player soul energy with ammount gained from battle
 
@@ -5103,9 +5649,9 @@ function summoningShrineIntroduction4 (GS) {  // sets playeraccessed shrine to t
 
 //////////// Data Zone 
 
-let playerLevel = 0
+let playerLevel = 7
 
-let playerHasAccessedSummoningShrine = false  // if false, will display the summoning shrine tutorial first
+let playerHasAccessedSummoningShrine = true  // if false, will display the summoning shrine tutorial first
 
 let playerHasAccessedLibrary = true // if false, will display library intro first. 
 let libraryAccessEnabled = true   // if the player can use the library
@@ -5121,6 +5667,7 @@ let items = []
 let enemy = {}   // enemy Demon inventory
 let soulEnergy = 10000
 let enemyBonusSoulEnergy = 0
+let whereShouldBattleEnd = "none"
 
 
 //// Move repository (probs import this later for tidiness)
@@ -5266,9 +5813,9 @@ const demonConstructors = {
 
     Imp : class {
         constructor(level) {
-            this.id = iDGenerator(iDList)
-            this.nickName = "none"
-            this.active = "true"
+            this.id = iDGenerator(iDListArray)
+            this.nickname = "none"
+            this.active = true
             this.type = "destruction"
             this.genus = "Imp"
             this.species = "Imp"
@@ -5282,6 +5829,8 @@ const demonConstructors = {
             this.pow = statGen (3, level)
             this.knownMoves = moveGen(level, this.species)
             this.movePP = ppGen(this.knownMoves)
+            this.introMessage = "Gah! Mortal, I will immolate you for daring to pull me into your realm!"
+            this.defeatMessage = "none"
         }
     }
 }
@@ -5462,7 +6011,7 @@ if ((debugMode) && (debugModeChangesEnemyInventory)) { // If change enemy inv de
 
 let gameState = {pWI, items, enemy, playerName, soulEnergy, day, time, displayAccessError,
     playerHasAccessedLibrary, libraryAccessEnabled, libraryInventory, playerHasAccessedSummoningShrine,
-    playerLevel}    // Creates gamestate object (becomes GS in arguments).  Contains all modifiable data that the game must keep track of.
+    playerLevel, whereShouldBattleEnd}    // Creates gamestate object (becomes GS in arguments).  Contains all modifiable data that the game must keep track of.
 
 
 ////
