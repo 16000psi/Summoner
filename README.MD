@@ -3,11 +3,11 @@
 ## What Am I?
 
 
-Summoner is a work-in-progress game with the dorky theme of summoning demons and fighting with them.  It is essentially an early generation pokemon game with some systems added and others removed, with a dark fantasy skin.  
+Summoner is a work-in-progress game with the dorky theme of summoning demons and fighting with them.  It is essentially an early generation pokemon game with some systems added and others removed, with a dark fantasy skin.  It is text-based and runs in the terminal. 
 
 It presently uses Node.js and inquirer to get a users input. An earlier version of the progam (Legacy/Summoner.mjs) had most of the features that I wanted, such as working battles, xp and leveling, a time / day / sleep system, random encounters and a library / move learning system.
 
-However, as I started this before enrolling in my bootcamp, I made a lot of mistakes with the design which were becoming more and more apparent as more features were added.  I also learned about stacks and realised that most of these problems could be solved if I built the program again from the ground up using an OOP philosophy.  I also wanted to entirely redesign the interface to be more aesthetic and defined, rather than just a mash of menus with totally inconsistent sizes and designs. 
+However, as I started this before enrolling in my bootcamp, I made a lot of mistakes with the design which were becoming more and more apparent as more features were added.  I also learned about stacks and realised that most of these problems could be solved if I built the program again from the ground up using an OOP philosophy.  I also wanted to entirely redesign the interface to be more aesthetic and defined, rather than just a mash of menus with totally inconsistent sizes and designs.  
 
 ## Current Progress
 
