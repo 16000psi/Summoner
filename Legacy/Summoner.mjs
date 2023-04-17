@@ -5651,15 +5651,15 @@ function summoningShrineIntroduction4 (GS) {  // sets playeraccessed shrine to t
 
 let playerLevel = 7
 
-let playerHasAccessedSummoningShrine = true  // if false, will display the summoning shrine tutorial first
+let playerHasAccessedSummoningShrine = false  // if false, will display the summoning shrine tutorial first
 
-let playerHasAccessedLibrary = true // if false, will display library intro first. 
+let playerHasAccessedLibrary = false // if false, will display library intro first. 
 let libraryAccessEnabled = true   // if the player can use the library
 let day = 1
 let time = 1
 let displayAccessError = "none"
 let playerName = "hard drive bastard"
-let enemyName = "Evil Bastard"
+let enemyName = "twat TWAT"
 let enemyIntroMessage = "none"
 let enemyDefeatMessage = "none"
 let pWI = []   // player Demon inventory
