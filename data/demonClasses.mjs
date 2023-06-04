@@ -163,7 +163,7 @@ class Demon {
 
     kill() {
 
-        // have a guess
+        // have a guess.  In future this should also remove status effects.
 
         this.HP = 0
     }

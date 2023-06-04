@@ -2,6 +2,8 @@ import {Imp, HornedDemon, Flamelurker, Infernal, Sedimentite, StormDemon, Voidwa
 
 class Summoner {
 
+    // Class defines the summoner, which can be player or AI.  Demons are stored in the demon inventory. 
+
     constructor (demonInventory, name = "none", isPlayer = false) {
 
         this.isPlayer = isPlayer
@@ -24,8 +26,24 @@ class Summoner {
         return true
     }
 
+    getActiveDemon () {
+
+        // unused duplicate from battle, for use later (trying to abstract a lot of the battle logic into other classes as battle is totally unwieldly and makes no sense)
+
+
+        for (let i in this.demonInventory) {
+
+            if (this.demonInventory[i].active == true) {
+                return this.demonInventory[i]
+            }
+
+        }
+    }
+
 
     changeActiveDemon (chosenDemon) {
+
+        // Changes the active demon.  demon.active is a boolean which should only be true on one living demon per inventory.  active is the demon currently used in battle.
 
         this.demonInventory.map((demon) => {
             demon.active = false
@@ -43,6 +61,8 @@ class Summoner {
             this.demonInventory[i].kill()
         }
     }
+
+
 
 }
 

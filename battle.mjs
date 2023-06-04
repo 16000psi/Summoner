@@ -38,11 +38,15 @@ class Battle {
 
     initialiseBattle () {
 
+        // sets the current battle demon inventories to the player and enemy demon inventories
+
         this.playerActiveDemon = this.summonActiveDemon(this.playerDemonInventory)
         this.enemyActiveDemon = this.summonActiveDemon(this.enemyDemonInventory)
     }
 
     summonActiveDemon (summonerInventory) {
+
+        // used by enemyChangeActiveDemon and playerChangeActiveDemon, fetches the active demon from the inventory and returns it. 
 
         for (let i in summonerInventory) {
 
@@ -52,6 +56,46 @@ class Battle {
         }
 
     }
+
+    enemyChangeActiveDemon () {
+
+        let demon = null
+
+        for (let i in this.enemyDemonInventory) {
+
+            if (this.enemyDemonInventory[i].HP > 0) {
+
+                demon = this.enemyDemonInventory[i]
+
+            }
+        }
+
+        this.enemy.changeActiveDemon(demon)
+        this.enemyActiveDemon = this.summonActiveDemon(this.enemyDemonInventory)
+        
+
+    
+    }
+
+    playerChangeActiveDemon () {
+
+        let demon = null
+
+        for (let i in this.playerDemonInventory) {
+
+            if (this.playerDemonInventory[i].HP > 0) {
+
+                demon = this.playerDemonInventory[i]
+
+            }
+        }
+
+        this.player.changeActiveDemon(demon)
+        this.playerActiveDemon = this.summonActiveDemon(this.playerDemonInventory)
+
+    
+    }
+
 
     playerChooseAction() {
 
@@ -246,44 +290,6 @@ class Battle {
 
     }
 
-    enemyChangeActiveDemon () {
-
-        let demon = null
-
-        for (let i in this.enemyDemonInventory) {
-
-            if (this.enemyDemonInventory[i].HP > 0) {
-
-                demon = this.enemyDemonInventory[i]
-
-            }
-        }
-
-        this.enemy.changeActiveDemon(demon)
-        this.enemyActiveDemon = this.summonActiveDemon(this.enemyDemonInventory)
-        
-
-    
-    }
-
-    playerChangeActiveDemon () {
-
-        let demon = null
-
-        for (let i in this.playerDemonInventory) {
-
-            if (this.playerDemonInventory[i].HP > 0) {
-
-                demon = this.playerDemonInventory[i]
-
-            }
-        }
-
-        this.player.changeActiveDemon(demon)
-        this.playerActiveDemon = this.summonActiveDemon(this.playerDemonInventory)
-
-    
-    }
 
 
     // Battle handler methods 
