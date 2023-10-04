@@ -18,6 +18,18 @@ class TestTestingUtilities(unittest.TestCase):
         self.assertEqual(new_line_length, 100)
 
 class TestFormatText(unittest.TestCase):
+    def test_non_string_input(self):
+        """ Test that non-string inputs return a type error and only strings are accepted"""
+
+        with self.assertRaises(TypeError):
+            Display.format_text(123)
+        with self.assertRaises(TypeError):
+            Display.format_text(['failed'])
+        try:
+            Display.format_text("hello") 
+        except TypeError:
+            self.fail("Display.format_text() raised TypeError unexpectedly with a string input")
+
     def test_removes_line_breaks(self):
         """ Tests that line breaks are replaced with the correct ammount of spaces """
 
@@ -72,6 +84,18 @@ class TestFormatText(unittest.TestCase):
         self.assertEqual(Display.format_text(input), desired)
 
 class TestTextToLines(unittest.TestCase):
+    def test_non_string_input(self):
+        """ Test that non-string inputs return a type error and only strings are accepted"""
+
+        with self.assertRaises(TypeError):
+            Display.text_to_lines(123)
+        with self.assertRaises(TypeError):
+            Display.text_to_lines(['failed'])
+        try:
+            Display.text_to_lines("hello") 
+        except TypeError:
+            self.fail("Display.text_to_lines() raised TypeError unexpectedly with a string input")
+
     def test_complete_functionality(self):
         """ Tests that the method takes a string, and returns the correctly formatted list """
 

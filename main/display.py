@@ -46,6 +46,8 @@ class Display:
         It works by iterating through the text.  Every time one of the above is detected, the string is modified and the loop resets reflecting the modified string length.  The iteration begins again from the point of the last modification. When the iteration gets to the end of the string without any changes, the loop exits.
         
         """
+        if not isinstance(text, str):
+            raise TypeError("Display.format_text(): input must be a string")
         
         def get_sequence_start_and_end_indexes(sequence):
             matches = re.finditer(sequence, text)
@@ -177,6 +179,9 @@ class Display:
     def text_to_lines(text):
         """This method takes a string (you should use format_text first, unless you like mess) and returns a list of strings, each string representing a line."""
 
+        if not isinstance(text, str):
+            raise TypeError("Display.text_to_lines(): input must be a string")
+
         result = []
         total_lines = math.ceil(len(text) / Display.line_length)
 
@@ -192,6 +197,13 @@ class Display:
     @staticmethod
     def centre_justify_lines(text_lines_list):
         """ This method adds spaces to either side of lines which are below the length set in line_length incrementally.  This has the effect of centre justifying the lines."""
+
+        if not isinstance(text_lines_list, list):
+            raise TypeError("Display.centre_justify_lines(): Input must be a list")
+
+        for item in text_lines_list:
+            if not isinstance(item, str):
+                raise TypeError("Display.centre_justify_lines(): All elements in the list must be strings")
         
         result = []
 
