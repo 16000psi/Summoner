@@ -17,7 +17,7 @@ class TestTestingUtilities(unittest.TestCase):
         self.assertEqual(new_printable_lines, 100)
         self.assertEqual(new_line_length, 100)
 
-class TestTextToLines(unittest.TestCase):
+class TestFormatText(unittest.TestCase):
     def test_removes_line_breaks(self):
         """ Tests that line breaks are replaced with the correct ammount of spaces """
 
@@ -71,3 +71,14 @@ class TestTextToLines(unittest.TestCase):
         desired = "123  45   678       1         woop"
         self.assertEqual(Display.format_text(input), desired)
 
+class TestTextToLines(unittest.TestCase):
+    def test_complete_functionality(self):
+        """ Tests that the method takes a string, and returns the correctly formatted list """
+
+        TestUtilities.set_display_dimensions(10,10)
+        input = '12345678901234567890'
+        desired = ['1234567890', '1234567890']
+        self.assertEqual(Display.text_to_lines(input), desired)
+
+
+        
