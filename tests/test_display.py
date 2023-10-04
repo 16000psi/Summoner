@@ -35,43 +35,43 @@ class TestFormatText(unittest.TestCase):
 
         TestUtilities.set_display_dimensions(10,10)
         lb = Display.line_break_sequence
-        input = "12345" + lb + "6789"
+        input_string = "12345" + lb + "6789"
         desired = "12345     6789"
-        self.assertEqual(Display.format_text(input), desired)
-        input = "123456789012345" + lb + "6789"
+        self.assertEqual(Display.format_text(input_string), desired)
+        input_string = "123456789012345" + lb + "6789"
         desired = "123456789012345     6789"
-        self.assertEqual(Display.format_text(input), desired)
+        self.assertEqual(Display.format_text(input_string), desired)
 
     def test_removes_line_breaks(self):
         """ Tests that double line breaks are replaced with the correct ammount of spaces """
 
         TestUtilities.set_display_dimensions(10,10)
         db = Display.double_line_break_sequence
-        input = "12345" + db + "6789"
+        input_string = "12345" + db + "6789"
         desired = "12345               6789"
-        self.assertEqual(Display.format_text(input), desired)
-        input = "123456789012345" + db + "6789"
+        self.assertEqual(Display.format_text(input_string), desired)
+        input_string = "123456789012345" + db + "6789"
         desired = "123456789012345               6789"
-        self.assertEqual(Display.format_text(input), desired)
+        self.assertEqual(Display.format_text(input_string), desired)
 
     def test_removes_page_breaks(self):
         """ Tests that page breaks are replaced with the correct ammount of spaces """
 
         TestUtilities.set_display_dimensions(2,10)
         pb = Display.page_break_sequence
-        input = "12345" + pb + "6789"
+        input_string = "12345" + pb + "6789"
         desired = "12345               6789"
-        self.assertEqual(Display.format_text(input), desired)
-        input = "123456789012345" + pb + "6789"
+        self.assertEqual(Display.format_text(input_string), desired)
+        input_string = "123456789012345" + pb + "6789"
         desired = "123456789012345     6789"
-        self.assertEqual(Display.format_text(input), desired)
+        self.assertEqual(Display.format_text(input_string), desired)
 
     def test_prevents_overflow(self):
         """ Tests that words that would otherwise overflow lines have enough spaces inserted infront of them that they start on the next line """
         TestUtilities.set_display_dimensions(10,10)
-        input = "1234567 90123"
+        input_string = "1234567 90123"
         desired = "1234567   90123"
-        self.assertEqual(Display.format_text(input), desired)
+        self.assertEqual(Display.format_text(input_string), desired)
 
     def test_combined_functionality(self):
         """ Tests that the function works with a combination of line breaks, double line breaks, page breaks and overflowing words """
@@ -79,9 +79,9 @@ class TestFormatText(unittest.TestCase):
         lb = Display.line_break_sequence
         db = Display.double_line_break_sequence
         pb = Display.page_break_sequence
-        input = "123" + lb + "45 678" + db + "1" + pb + "woop"
+        input_string = "123" + lb + "45 678" + db + "1" + pb + "woop"
         desired = "123  45   678       1         woop"
-        self.assertEqual(Display.format_text(input), desired)
+        self.assertEqual(Display.format_text(input_string), desired)
 
 class TestTextToLines(unittest.TestCase):
     def test_non_string_input(self):
@@ -100,9 +100,39 @@ class TestTextToLines(unittest.TestCase):
         """ Tests that the method takes a string, and returns the correctly formatted list """
 
         TestUtilities.set_display_dimensions(10,10)
-        input = '12345678901234567890'
+        input_string = '12345678901234567890'
         desired = ['1234567890', '1234567890']
-        self.assertEqual(Display.text_to_lines(input), desired)
+        self.assertEqual(Display.text_to_lines(input_string), desired)
 
+class TestCentreJustifyLines(unittest.TestCase):
+    def test_input_only_list_of_strings(self):
+        """ Test that the only allowed input is a list, and that any items in the list must be strings """
+
+        with self.assertRaises(TypeError):
+            Display.centre_justify_lines(123)
+        with self.assertRaises(TypeError):
+            Display.centre_justify_lines([123, 456, 789])
+        with self.assertRaises(TypeError):
+            Display.centre_justify_lines("hello")
+        try:
+            Display.centre_justify_lines(["hello", "world"]) 
+        except TypeError:
+            self.fail("Display.centre_justify_lines() raised TypeError unexpectedly with a string input")
+
+    def test_complete_lines_unadjusted(self):
+        """ Tests that lines aleady at len(line_length) are not modified """
+
+        TestUtilities.set_display_dimensions(10,10)
+        input_list = ['1234567890', '1234567890']
+        desired = ['1234567890', '1234567890']
+        self.assertEqual(Display.centre_justify_lines(input_list), desired)
+
+    def test_incomplete_lines_adjusted(self):
+        """ Tests that lines below len(line_length) are have spaces added to either side """
+
+        TestUtilities.set_display_dimensions(10,10)
+        input_list = ['123456789', '1']
+        desired = ['123456789 ', '    1     ']
+        self.assertEqual(Display.centre_justify_lines(input_list), desired)
 
         

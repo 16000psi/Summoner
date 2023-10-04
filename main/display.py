@@ -210,7 +210,7 @@ class Display:
         for line in text_lines_list:
             line_stripped = line.rstrip()
             
-            while len(line_stripped) < 60:
+            while len(line_stripped) < Display.line_length:
                 if len(line_stripped) % 2 == 1:
                     line_stripped = line_stripped + " "
                 else: line_stripped = " " + line_stripped
