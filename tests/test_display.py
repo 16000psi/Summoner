@@ -42,7 +42,7 @@ class TestFormatText(unittest.TestCase):
         desired = "123456789012345     6789"
         self.assertEqual(Display.format_text(input_string), desired)
 
-    def test_removes_line_breaks(self):
+    def test_removes_double_line_breaks(self):
         """ Tests that double line breaks are replaced with the correct ammount of spaces """
 
         TestUtilities.set_display_dimensions(10,10)

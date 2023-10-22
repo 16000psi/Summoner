@@ -1,21 +1,23 @@
 import random
 
-class Engine:
-    def __init__(self):
-        self.stack = []
-        self.stack_size = 0
+class MenuHandler:
+    stack = []
+    stack_size = 0
 
-    def stack_add(self, func):
-        self.stack.append(func)
-        self.stack_size += 1
+    @staticmethod
+    def stack_add(func):
+        MenuHandler.stack.append(func)
+        MenuHandler.stack_size += 1
 
-    def stack_remove(self):
-        self.stack.pop()
-        self.stack_size -= 1
+    @staticmethod
+    def stack_remove():
+        MenuHandler.stack.pop()
+        MenuHandler.stack_size -= 1
 
+    @staticmethod
+    def stack_execute(*args):
+        MenuHandler.stack[len(MenuHandler.stack) -1](*args)
 
-    def stack_execute(self, *args):
-        self.stack[len(self.stack) -1](*args)
 
 def jokefunc(arg):
     def subjoke():
@@ -23,9 +25,10 @@ def jokefunc(arg):
 
     return subjoke
 
-engine = Engine()
-engine.stack_add(jokefunc("bleep"))
-engine.stack_execute()
+MenuHandler.stack_add(jokefunc("bleep"))
+MenuHandler.stack_add(jokefunc("bleep"))
+MenuHandler.stack_execute()
+MenuHandler.stack_execute()
 
 import random
 print(random.uniform(-0.2, 0.2))
