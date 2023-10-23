@@ -23,7 +23,6 @@ class Engine:
     def main():
 
         while True:
-            print(Engine.scene_stack)
             if Engine.scene_stack_size > 0:
                 Engine.realise_scene()
             else: 

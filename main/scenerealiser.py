@@ -2,8 +2,6 @@ class SceneRealiser:
     @staticmethod
     def process(scene):
 
-        print(scene)
-
         print(scene.for_display_list)
         
         for i, decision in enumerate(scene.decisions_list):
