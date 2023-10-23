@@ -45,3 +45,7 @@ Display functions: These functions are called by the engine to generate the disp
 # All this raises the question of how the code will actually be structured.  I think the engine will simply have to be accessible and modifiable from all products. 
 
 # IDEA - have a dreams system with nightmares and ~ battles ~ where the player fights as themselves and can lose / can win etc with bits of story.
+
+# Question - if there can be an arbitrary amount of sidequests, how does the system keep track of what areas / battles / items to render?
+
+

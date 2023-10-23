@@ -8,3 +8,4 @@ class Decision:
 
     def choose(self):
         self.action(*self.args) 
+        print(self.args)
