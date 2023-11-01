@@ -3,7 +3,7 @@ class SceneRealiser:
     def process(scene):
 
         print(scene.for_display_list)
-        
+
         for i, decision in enumerate(scene.decisions_list):
             print(f"press {i} to {decision.choice_description}")
 
@@ -11,11 +11,11 @@ class SceneRealiser:
 
         try:
             choice = int(choice)
-        except:
+        except ValueError:
             return
 
         if choice < 0 or choice > len(scene.decisions_list)-1:
-            return 
+            return
 
         else:
             scene.decisions_list[choice].choose()

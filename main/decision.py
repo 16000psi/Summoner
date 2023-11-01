@@ -7,5 +7,5 @@ class Decision:
         self.args = args
 
     def choose(self):
-        self.action(*self.args) 
+        self.action(*self.args)
         print(self.args)

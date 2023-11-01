@@ -6,9 +6,7 @@ class Summoner:
     def check_if_all_demons_dead(self):
 
         for demon in self.demon_inventory:
-
             if demon.check_if_alive:
                 return False
-            
-        return True
 
+        return True

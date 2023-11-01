@@ -1,9 +1,11 @@
 import random
 import math
 
+
 class Demon:
 
-    # randomness modifier - maximum deviation from base stat value, as a fraction of 1
+    # randomness modifier - maximum deviation from base stat value, as a
+    # fraction of 1
     stat_randomness_modifier = 0.2
     # the maximum possible level of a demon
     maximum_level = 30
@@ -15,8 +17,16 @@ class Demon:
     # minimum hp
     hp_buffer_value = 10
 
-
-    def __init__(self, level, base_hp, base_attack, base_defence, base_special_attack, base_special_defence, base_speed):
+    def __init__(
+        self,
+        level,
+        base_hp,
+        base_attack,
+        base_defence,
+        base_special_attack,
+        base_special_defence,
+        base_speed
+    ):
 
         self.level = level
         self.xp = 0
@@ -25,49 +35,79 @@ class Demon:
         self.type = None
         self.nickname = None
 
+        # This is where the base stats are generated.  The base stats are
+        # passed when initialising a demon, and have deviation
+        # applied based on Demon.stat_randomness_modifier.
 
-        # This is where the base stats are generated.  The base stats are passed when initialising a demon, and have deviation applied based on Demon.stat_randomness_modifier.        
+        self.base_hp = math.floor(
+            base_hp * (1 + random.uniform(
+                -Demon.stat_randomness_modifier,
+                Demon.stat_randomness_modifier))
+        )
+        self.base_attack = math.floor(
+            base_attack * (1 + random.uniform(
+                -Demon.stat_randomness_modifier,
+                Demon.stat_randomness_modifier))
+        )
+        self.base_defence = math.floor(
+            base_defence * (1 + random.uniform(
+                -Demon.stat_randomness_modifier,
+                Demon.stat_randomness_modifier))
+        )
+        self.base_special_attack = math.floor(base_special_attack * (
+            1 + random.uniform(
+                -Demon.stat_randomness_modifier,
+                Demon.stat_randomness_modifier))
+        )
+        self.base_special_defence = math.floor(base_special_defence * (
+            1 + random.uniform(
+                -Demon.stat_randomness_modifier,
+                Demon.stat_randomness_modifier))
+        )
+        self.base_speed = math.floor(
+            base_speed * (1 + random.uniform(
+                -Demon.stat_randomness_modifier,
+                Demon.stat_randomness_modifier))
+        )
 
-        self.base_hp = math.floor(base_hp * (1 + random.uniform(-Demon.stat_randomness_modifier, Demon.stat_randomness_modifier)))
-        self.base_attack = math.floor(base_attack * (1 + random.uniform(-Demon.stat_randomness_modifier, Demon.stat_randomness_modifier)))
-        self.base_defence = math.floor(base_defence * (1 + random.uniform(-Demon.stat_randomness_modifier, Demon.stat_randomness_modifier)))
-        self.base_special_attack = math.floor(base_special_attack * (1 + random.uniform(-Demon.stat_randomness_modifier, Demon.stat_randomness_modifier)))
-        self.base_special_defence = math.floor(base_special_defence * (1 + random.uniform(-Demon.stat_randomness_modifier, Demon.stat_randomness_modifier)))
-        self.base_speed = math.floor(base_speed * (1 + random.uniform(-Demon.stat_randomness_modifier, Demon.stat_randomness_modifier)))
-
-        self.max_hp = self.derive_stat_from_level(self.base_hp) + Demon.hp_buffer_value
+        self.max_hp = self.derive_stat_from_level(
+            self.base_hp) + Demon.hp_buffer_value
         self.attack = self.derive_stat_from_level(self.base_attack)
         self.defence = self.derive_stat_from_level(self.base_defence)
-        self.special_attack = self.derive_stat_from_level(self.base_special_attack)
-        self.special_defence = self.derive_stat_from_level(self.base_special_defence)
+        self.special_attack = self.derive_stat_from_level(
+            self.base_special_attack)
+        self.special_defence = self.derive_stat_from_level(
+            self.base_special_defence)
         self.speed = self.derive_stat_from_level(self.base_speed)
 
         self.hp = self.max_hp
 
-
     # XP / level methods
 
     def derive_stat_from_level(self, base_stat):
+        """This method is used on initialisation and when leveling up.  It is 
+        applied to each stat and calculates the stat as a fraction of the base 
+        stat. It cannot return less than 1."""
 
-        """This method is used on initialisation and when leveling up.  It is applied to each stat and calculates the stat as a fraction of the base stat. It cannot return less than 1."""
-
-        
         stat_per_level = base_stat / Demon.maximum_level
 
         result = math.floor(stat_per_level * self.level)
-        
+
         if result < 1:
             result = 1
 
         return result
 
     def receive_xp_check_level_up(self, xp):
-
-        """Receives XP, adds to total. Checks if level up, calls level_up if so, removes xp required to level up from self.xp, and returns true.  Returns false if no level up. Relies on base_xp and xp_growthfactor to check for level up."""
+        """Receives XP, adds to total. Checks if level up, calls level_up if 
+        so, removes xp required to level up from self.xp, and returns true.  
+        Returns false if no level up. Relies on base_xp and xp_growthfactor 
+        to check for level up."""
 
         self.xp += xp
 
-        target_xp = math.floor(Demon.base_xp * (Demon.xp_growth_factor ** (self.level))) 
+        target_xp = math.floor(
+            Demon.base_xp * (Demon.xp_growth_factor ** (self.level)))
 
         if self.xp > target_xp and self.level < Demon.maximum_level:
 
@@ -75,22 +115,24 @@ class Demon:
             self.level_up()
 
             return True
-        
+
         return False
 
     def level_up(self):
-
-        """Called by receive_xp_check_level_up if leveled up. Adds a level and recalculates stats."""
+        """Called by receive_xp_check_level_up if leveled up. Adds a level and 
+        recalculates stats."""
 
         self.level += 1
 
-        self.max_hp = self.derive_stat_from_level(self.base_hp) + Demon.hp_buffer_value
+        self.max_hp = self.derive_stat_from_level(
+            self.base_hp) + Demon.hp_buffer_value
         self.attack = self.derive_stat_from_level(self.base_attack)
         self.defence = self.derive_stat_from_level(self.base_defence)
-        self.special_attack = self.derive_stat_from_level(self.base_special_attack)
-        self.special_defence = self.derive_stat_from_level(self.base_special_defence)
+        self.special_attack = self.derive_stat_from_level(
+            self.base_special_attack)
+        self.special_defence = self.derive_stat_from_level(
+            self.base_special_defence)
         self.speed = self.derive_stat_from_level(self.base_speed)
-
 
     # Reporting methods
 
@@ -101,34 +143,33 @@ class Demon:
             "level": self.level,
             "xp": self.xp,
             "nickname": self.nickname,
-            "basehp" : self.base_hp,
-            "baseAtt" : self.base_attack,
-            "baseDef" : self.base_defence,
-            "baseSpAtt" : self.base_special_attack,
-            "baseSpDef" : self.base_special_defence,
-            "baseSpeed" : self.base_speed,
-            "hp" : self.hp,
-            "maxhp" : self.max_hp,
-            "attack" : self.attack,
-            "defence" : self.defence,
-            "spAtt" : self.special_attack,
-            "spDef" : self.special_defence,
-            "speed" : self.speed
+            "basehp": self.base_hp,
+            "baseAtt": self.base_attack,
+            "baseDef": self.base_defence,
+            "baseSpAtt": self.base_special_attack,
+            "baseSpDef": self.base_special_defence,
+            "baseSpeed": self.base_speed,
+            "hp": self.hp,
+            "maxhp": self.max_hp,
+            "attack": self.attack,
+            "defence": self.defence,
+            "spAtt": self.special_attack,
+            "spDef": self.special_defence,
+            "speed": self.speed
         }
 
     def create_combat_hash_stat_report(self):
         return {
             "level": self.level,
             "xp": self.xp,
-            "hp" : self.hp,
-            "maxhp" : self.max_hp,
-            "attack" : self.attack,
-            "defence" : self.defence,
-            "spAtt" : self.special_attack,
-            "spDef" : self.special_defence,
-            "speed" : self.speed
+            "hp": self.hp,
+            "maxhp": self.max_hp,
+            "attack": self.attack,
+            "defence": self.defence,
+            "spAtt": self.special_attack,
+            "spDef": self.special_defence,
+            "speed": self.speed
         }
-
 
     def check_if_alive(self):
         if self.hp > 0:
@@ -136,8 +177,7 @@ class Demon:
         else:
             return False
 
-
-    # Combat methods 
+    # Combat methods
 
     def kill(self):
         self.hp = 0
@@ -145,33 +185,88 @@ class Demon:
 
 """Demon types"""
 
+
 class DestructionDemon(Demon):
-    def __init__(self, level, base_hp, base_attack, base_defence, base_special_attack, base_special_defence, base_speed):
-        super().__init__(level, base_hp, base_attack, base_defence, base_special_attack, base_special_defence, base_speed)
+    def __init__(
+        self,
+        level,
+        base_hp,
+        base_attack,
+        base_defence,
+        base_special_attack,
+        base_special_defence,
+        base_speed
+    ):
+        super().__init__(level, base_hp, base_attack, base_defence,
+                         base_special_attack, base_special_defence, base_speed)
 
         self.type = "Destruction"
 
+
 class VoidDemon(Demon):
-    def __init__(self, level, base_hp, base_attack, base_defence, base_special_attack, base_special_defence, base_speed):
-        super().__init__(level, base_hp, base_attack, base_defence, base_special_attack, base_special_defence, base_speed)
+    def __init__(
+        self,
+        level,
+        base_hp,
+        base_attack,
+        base_defence,
+        base_special_attack,
+        base_special_defence,
+        base_speed
+    ):
+        super().__init__(level, base_hp, base_attack, base_defence,
+                         base_special_attack, base_special_defence, base_speed)
 
         self.type = "Void"
 
+
 class ArcaneDemon(Demon):
-    def __init__(self, level, base_hp, base_attack, base_defence, base_special_attack, base_special_defence, base_speed):
-        super().__init__(level, base_hp, base_attack, base_defence, base_special_attack, base_special_defence, base_speed)
+    def __init__(
+        self,
+        level,
+        base_hp,
+        base_attack,
+        base_defence,
+        base_special_attack,
+        base_special_defence,
+        base_speed
+    ):
+        super().__init__(level, base_hp, base_attack, base_defence,
+                         base_special_attack, base_special_defence, base_speed)
 
         self.type = "Arcane"
 
+
 class DecayDemon(Demon):
-    def __init__(self, level, base_hp, base_attack, base_defence, base_special_attack, base_special_defence, base_speed):
-        super().__init__(level, base_hp, base_attack, base_defence, base_special_attack, base_special_defence, base_speed)
+    def __init__(
+        self,
+        level,
+        base_hp,
+        base_attack,
+        base_defence,
+        base_special_attack,
+        base_special_defence,
+        base_speed
+    ):
+        super().__init__(level, base_hp, base_attack, base_defence,
+                         base_special_attack, base_special_defence, base_speed)
 
         self.type = "Decay"
 
+
 class AncientDemon(Demon):
-    def __init__(self, level, base_hp, base_attack, base_defence, base_special_attack, base_special_defence, base_speed):
-        super().__init__(level, base_hp, base_attack, base_defence, base_special_attack, base_special_defence, base_speed)
+    def __init__(
+        self,
+        level,
+        base_hp,
+        base_attack,
+        base_defence,
+        base_special_attack,
+        base_special_defence,
+        base_speed
+    ):
+        super().__init__(level, base_hp, base_attack, base_defence,
+                         base_special_attack, base_special_defence, base_speed)
 
         self.type = "Ancient"
 
@@ -179,6 +274,7 @@ class AncientDemon(Demon):
 """Individual Demons"""
 
 # Destruction demons
+
 
 class Imp(DestructionDemon):
     def __init__(self, level):
@@ -366,4 +462,3 @@ class TitanicVisage(AncientDemon):
     def __init__(self, level):
         super().__init__(level, 92, 78, 109, 68, 110, 99)
         self.species = "Titanic Visage"
-

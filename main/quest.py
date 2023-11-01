@@ -8,7 +8,10 @@ class Quest:
         self.progress_level += ammount
 
     def make_progress_check(self, minimum_level, maximum_level):
-        if self.progress_level >= minimum_level and self.progress_level <= maximum_level:
+        if (
+            self.progress_level >= minimum_level
+            and self.progress_level <= maximum_level
+        ):
             return True
         else:
             return False

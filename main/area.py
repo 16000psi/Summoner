@@ -1,9 +1,17 @@
-from .engine import Engine 
+from .engine import Engine
 from .decision import Decision
 from .scene import Scene
 
+
 class Area:
-    def __init__(self, title, visit_text, not_accessible_text, inside_text, preferred_key):
+    def __init__(
+        self,
+        title,
+        visit_text,
+        not_accessible_text,
+        inside_text,
+        preferred_key
+    ):
         self.title = title
         self.visit_text = visit_text
         self.not_accessible_text = not_accessible_text
@@ -31,7 +39,7 @@ class Area:
             if not condition():
                 return False
         return True
-    
+
     def evaluate_entrance_conditions(self):
         print(self.entrance_conditions)
         for condition in self.entrance_conditions:
@@ -39,7 +47,6 @@ class Area:
             if not condition():
                 return False
         return True
-
 
     def generate_entrance_decision(self):
 
@@ -52,7 +59,7 @@ class Area:
 
     def generate_entrance_not_accessible_decision(self):
 
-        name = self.title 
+        name = self.title
         choice_description = self.visit_text
         preferred_key = self.preferred_key
         action = self.process_not_accessible
@@ -66,11 +73,18 @@ class Area:
 
         #  Sort Areas
         for area in self.links_to:
-            
-            if area.evaluate_appearance_conditions() and not area.evaluate_entrance_conditions():
-                options.append(area.generate_entrance_not_accessible_decision())
 
-            elif  area.evaluate_appearance_conditions() and area.evaluate_entrance_conditions():
+            if (
+                area.evaluate_appearance_conditions()
+                and not area.evaluate_entrance_conditions()
+            ):
+                options.append(
+                    area.generate_entrance_not_accessible_decision())
+
+            elif (
+                area.evaluate_appearance_conditions()
+                and area.evaluate_entrance_conditions()
+            ):
                 options.append(area.generate_entrance_decision())
 
         #  Sort Activities
@@ -80,12 +94,13 @@ class Area:
             choice_description = battle.challenge_text
             preferred_key = battle.preferred_key
             action = battle.fight
-            
-            options.append(Decision(name, choice_description, preferred_key, action))
+
+            options.append(
+                Decision(name, choice_description, preferred_key, action))
 
         Engine.remove_scene()
         Engine.add_scene(Scene(for_display, options))
-    
+
     def process_not_accessible(self):
 
         for_display = [self.not_accessible_text]
@@ -96,10 +111,7 @@ class Area:
         preferred_key = ""
         action = Engine.remove_scene
 
-        options.append(Decision(name, choice_description, preferred_key, action))
+        options.append(
+            Decision(name, choice_description, preferred_key, action))
 
         Engine.add_scene(Scene(for_display, options))
-
-
-
-

@@ -1,6 +1,7 @@
 from .scenerealiser import SceneRealiser
-class Engine:
 
+
+class Engine:
     scene_stack = []
     scene_stack_size = 0
 
@@ -19,21 +20,18 @@ class Engine:
             Engine.scene_stack.pop()
             Engine.scene_stack_size -= 1
 
-    ### TEST METHOD 
+    # TEST METHOD
     @staticmethod
     def print_scene_info():
         for i, scene in enumerate(Engine.scene_stack):
             print(f"Scene {i}: {scene.for_display_list}")
-
 
     @staticmethod
     def main():
 
         while True:
             if Engine.scene_stack_size > 0:
-
                 Engine.print_scene_info()
                 Engine.realise_scene()
-            else: 
+            else:
                 break
-
