@@ -5,14 +5,14 @@ from .decision import Decision
 
 class Battle:
     def __init__(
-            self,
-            summoner,
-            challenge_text,
-            preferred_key,
-            battle_intro_text,
-            battle_lost_text,
-            battle_won_text
-        ):
+        self,
+        summoner,
+        challenge_text,
+        preferred_key,
+        battle_intro_text,
+        battle_lost_text,
+        battle_won_text
+    ):
 
         self.summoner = summoner
         self.challenge_text = challenge_text
@@ -73,7 +73,7 @@ class Battle:
 
     def lose(self):
 
-        for_display = [self.battle_won_text]
+        for_display = [self.battle_lost_text]
         options = []
 
         continue_name = "continue"
