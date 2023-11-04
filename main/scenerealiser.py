@@ -1,6 +1,25 @@
+from .scene import SceneMode
+
+
 class SceneRealiser:
     @staticmethod
-    def process(scene):
+    def realise(scene):
+        """
+        This is called on the engine and used to process a scene
+        (a an object containing the information and decisions to
+        display to the player). Depending on the scene mode,
+        a different method is called to display the scene.
+        """
+
+        if scene.mode == SceneMode.PROTOTYPE:
+            SceneRealiser.process_prototype(scene)
+
+    @staticmethod
+    def process_prototype(scene):
+        """
+        Prints for diplay list and options in the most generic way,
+        not calling any display methods, for testing / prototyping.
+        """
 
         print(scene.for_display_list)
 
