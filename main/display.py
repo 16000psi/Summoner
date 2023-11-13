@@ -1,6 +1,6 @@
 import math
 import re
-from data.border import border
+from main.data.border import border
 
 
 class Display:
@@ -12,6 +12,18 @@ class Display:
     line_break_sequence = "/n"
     double_line_break_sequence = "/d"
     page_break_sequence = "/p"
+
+    @staticmethod
+    def cut_line_into_background_border(line, background_line):
+
+        line_stripped = line.rstrip()
+
+        while len(line_stripped) < Display.line_length:
+            if len(line_stripped) % 2 == 1:
+                line_stripped = line_stripped + " "
+            else:
+                line_stripped = " " + line_stripped
+        return background_line[:10] + line_stripped + background_line[70:]
 
     @staticmethod
     def format_text(text):

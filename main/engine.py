@@ -52,6 +52,7 @@ class Engine:
         The main game loop - calling this starts the game rendering the top
         scene in the stack.
         """
+        print("something")
 
         while True:
             if Engine.scene_stack_size > 0:

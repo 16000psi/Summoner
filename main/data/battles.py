@@ -1,5 +1,5 @@
 from main.battle import Battle
-from data.summoners import example_summoner
+from main.data.summoners import example_summoner
 
 example_battle = Battle(
     example_summoner,

@@ -1,6 +1,6 @@
 from .engine import Engine
 from .decision import Decision
-from .scene import Scene
+from .scene import Scene, SceneMode
 
 
 class Area:
@@ -131,7 +131,7 @@ class Area:
         decisions representing the available Battles and connected Areas.
         """
 
-        for_display = [self.visit_text]
+        for_display = [self.inside_text]
         options = []
 
         #  Sort Areas
@@ -162,7 +162,7 @@ class Area:
                 Decision(name, choice_description, preferred_key, action))
 
         Engine.remove_scene()
-        Engine.add_scene(Scene(for_display, options))
+        Engine.add_scene(Scene(for_display, options, SceneMode.AREA))
 
     def process_not_accessible(self):
         """

@@ -1,8 +1,9 @@
 from main.engine import Engine
-from data.quests import example_quest
-from data.areaseedbattles import *
+from main.data.quests import example_quest
+from main.data.areaseedbattles import *
 
 example_quest.increment_progress(10)
+Engine.print_scene_info()
 area1.process()
 Engine.main()
 
