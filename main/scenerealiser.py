@@ -4,9 +4,10 @@ from main.data.border import border
 
 from main.player import player
 
+
 class SceneRealiser:
-    @staticmethod
-    def realise(scene):
+    @classmethod
+    def realise(cls, scene):
         """
         This is called on the engine and used to process a scene
         (a an object containing the information and decisions to
@@ -15,14 +16,14 @@ class SceneRealiser:
         """
 
         if scene.mode == SceneMode.PROTOTYPE:
-            SceneRealiser.process_prototype(scene)
+            cls.process_prototype(scene)
         elif scene.mode == SceneMode.AREA:
-            SceneRealiser.process_area(scene)
+            cls.process_area(scene)
 
-    @staticmethod
-    def process_options(decisions_list):
+    @classmethod
+    def process_options(cls, decisions_list):
 
-        decisions_and_chosen_keys = SceneRealiser.get_keys_for_decisions(
+        decisions_and_chosen_keys = cls.get_keys_for_decisions(
             decisions_list)
 
         valid_options = []
@@ -60,15 +61,15 @@ class SceneRealiser:
             pass
             # Restart the cycle!!!!!!
 
-    @staticmethod
-    def get_keys_for_decisions(decisions_list):
+    @classmethod
+    def get_keys_for_decisions(cls, decisions_list):
         result = {}
         for i, decision in enumerate(decisions_list):
             result[str(i)] = decision
         return result
 
-    @staticmethod
-    def process_prototype(scene):
+    @classmethod
+    def process_prototype(cls, scene):
         """
         Prints for diplay list and options in the most generic way,
         not calling any display methods, for testing / prototyping.
@@ -92,8 +93,8 @@ class SceneRealiser:
         else:
             scene.decisions_list[choice].choose()
 
-    @staticmethod
-    def process_area(scene):
+    @classmethod
+    def process_area(cls, scene):
         """
         """
 
@@ -120,4 +121,4 @@ class SceneRealiser:
             else:
                 print(border[i])
 
-        SceneRealiser.process_options(scene.decisions_list)
+        cls.process_options(scene.decisions_list)
