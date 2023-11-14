@@ -56,7 +56,6 @@ class Engine:
 
         while True:
             if Engine.scene_stack_size > 0:
-                Engine.print_scene_info()
                 Engine.realise_scene()
             else:
                 break
