@@ -48,9 +48,9 @@ class SceneRealiser:
             for_first_line = options_text
 
         print(Display.cut_line_into_background_border(
-            for_first_line, border[20]))
+            for_first_line, border[21]))
         print(Display.cut_line_into_background_border(
-            for_second_line, border[21]))
+            for_second_line, border[22]))
 
         player_selection = input("Select a key and hit enter:")
 
