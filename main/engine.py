@@ -11,43 +11,43 @@ class Engine:
     scene_stack = []
     scene_stack_size = 0
 
-    @staticmethod
-    def realise_scene():
+    @classmethod
+    def realise_scene(cls):
         """
         Calls SceneRealiser to process the top scene in the stack. Part
         of the game loop (main())
         """
-        SceneRealiser.realise(Engine.scene_stack[len(Engine.scene_stack) - 1])
+        SceneRealiser.realise(cls.scene_stack[len(cls.scene_stack) - 1])
 
-    @staticmethod
-    def add_scene(scene):
+    @classmethod
+    def add_scene(cls, scene):
         """
         Called as part of Decisions - add a scene to the top of the stack
         to be rendered on the next loop.
         """
-        Engine.scene_stack.append(scene)
-        Engine.scene_stack_size += 1
+        cls.scene_stack.append(scene)
+        cls.scene_stack_size += 1
 
-    @staticmethod
-    def remove_scene():
+    @classmethod
+    def remove_scene(cls):
         """
         Called as part of Decisions - removes a scene from the stack.
         """
-        if Engine.scene_stack_size > 0:
-            Engine.scene_stack.pop()
-            Engine.scene_stack_size -= 1
+        if cls.scene_stack_size > 0:
+            cls.scene_stack.pop()
+            cls.scene_stack_size -= 1
 
     # TEST METHOD
-    @staticmethod
-    def print_scene_info():
+    @classmethod
+    def print_scene_info(cls):
         """
         Used for debugging, prints infromation about the scenes in the stack.
         """
-        for i, scene in enumerate(Engine.scene_stack):
+        for i, scene in enumerate(cls.scene_stack):
             print(f"Scene {i}: {scene.for_display_list}")
 
-    @staticmethod
-    def main():
+    @classmethod
+    def main(cls):
         """
         The main game loop - calling this starts the game rendering the top
         scene in the stack.
@@ -55,7 +55,7 @@ class Engine:
         print("something")
 
         while True:
-            if Engine.scene_stack_size > 0:
-                Engine.realise_scene()
+            if cls.scene_stack_size > 0:
+                cls.realise_scene()
             else:
                 break
