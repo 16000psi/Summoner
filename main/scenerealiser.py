@@ -102,8 +102,14 @@ class SceneRealiser:
             "TOP LINE TITLE", border[0]))
         print(Display.cut_line_into_background_border(
             "Line 2 empty", border[1]))
+
+        date_name_money_line = Display.evenly_space_nargs_strings_in_line(
+            "EXAMPLE DATE",
+            player.name,
+            '£' + str(player.wealth),
+        )
         print(Display.cut_line_into_background_border(
-            player.name, border[2]))
+            date_name_money_line, border[2]))
         for i in range(3, 21):
             if i == 0:
                 print(Display.cut_line_into_background_border(

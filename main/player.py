@@ -13,4 +13,4 @@ class Player(Summoner):
         quest.increment_progress(1)
 
 
-player = Player("PLAYERNAME", [], 200)
+player = Player("EXAMPLE_PLAYERNAME", [], 200)
