@@ -4,6 +4,6 @@ from main.data.areaseedbattles import *
 
 example_quest.increment_progress(10)
 Engine.print_scene_info()
-area1.process()
+area_chambers.process()
 Engine.main()
 
