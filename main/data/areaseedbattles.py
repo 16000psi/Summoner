@@ -1,6 +1,7 @@
 from .areas import *
 from .battles import *
 from .quests import *
+from main.player import Player
 
 area_courtyard.define_available_battles([example_battle])
 area_cave.define_appearance_conditions(

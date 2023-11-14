@@ -2,6 +2,7 @@ from main.scene import SceneMode
 from main.display import Display
 from main.data.border import border
 
+from main.player import player
 
 class SceneRealiser:
     @staticmethod
@@ -100,7 +101,9 @@ class SceneRealiser:
             "TOP LINE TITLE", border[0]))
         print(Display.cut_line_into_background_border(
             "Line 2 empty", border[1]))
-        for i in range(2, 21):
+        print(Display.cut_line_into_background_border(
+            player.name, border[2]))
+        for i in range(3, 21):
             if i == 0:
                 print(Display.cut_line_into_background_border(
                     "TOP LINE TITLE", border[i]))
