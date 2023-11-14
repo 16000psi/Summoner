@@ -26,6 +26,36 @@ class Display:
         return background_line[:10] + line_stripped + background_line[70:]
 
     @staticmethod
+    def evenly_space_nargs_strings_in_line(*strings):
+
+        strings = [*strings]
+
+        # Minimum space between each item
+        dividing_spaces = 2
+        truncate_sequence = '...'
+
+        while len(''.join(strings) + (dividing_spaces * (len(strings) - 1) * ' ')) >= Display.line_length:
+            longest_index = max(range(len(strings)),
+                                key=lambda i: len(strings[i]))
+            operating_string = strings[longest_index]
+
+            if operating_string.endswith(truncate_sequence):
+                operating_string = operating_string[:-4] + truncate_sequence
+            else:
+                operating_string = operating_string[:-3] + truncate_sequence
+
+            strings[longest_index] = operating_string
+
+        while len(''.join(strings) + (dividing_spaces * (len(strings) - 1) * ' ')) < Display.line_length:
+            for i, string in enumerate(strings):
+                if len(''.join(strings) + (dividing_spaces * (len(strings) - 1) * ' ')) < Display.line_length:
+                    if i < (len(strings) - 1):
+                        strings[i] = strings[i] + ' '
+        return ''.join(strings)
+
+        return strings
+
+    @staticmethod
     def format_text(text):
         """ This method takes an input texting and formats it, completing 3 tasks:
 
