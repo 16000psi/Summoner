@@ -63,9 +63,17 @@ class SceneRealiser:
 
     @classmethod
     def get_keys_for_decisions(cls, decisions_list):
+        fallback_characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
         result = {}
-        for i, decision in enumerate(decisions_list):
-            result[str(i)] = decision
+        for decision in decisions_list:
+            if decision.preferred_key.upper() in result:
+                for character in fallback_characters:
+                    if character not in result:
+                        result[character] = decision
+                        break
+            # TODO - raise error somehow here if all fallback characters cycled through
+            else:
+                result[decision.preferred_key.upper()] = decision
         return result
 
     @classmethod

@@ -5,35 +5,35 @@ area_chambers = Area(
     "go to your chambers",
     "you are too weak to enter",
     "You are inside your chambers. You have a bed, and a window.",
-    "C"
+    "c"
 )
 area_great_hall = Area(
     "Great Hall",
     "enter the Great Hall",
     "you are too weak to enter",
     "You are inside the great hall. The fire is roaring.",
-    "H"
+    "c"
 )
 area_courtyard = Area(
     "Courtyard",
     "enter the courtyard",
     "you are too weak to enter",
     "You are in the coartyard.  There are some lovely plants.",
-    "Y"
+    "b"
 )
 area_lounge = Area(
     "Lounge",
     "enter the lounge",
     "you are too weak to enter",
     "You are in the lounge. The furniture is incredibly dated.",
-    "L"
+    "b"
 )
 area_cave = Area(
     "Cave",
     "Enter the cave",
     "you are too weak to enter",
     "You are in the cave. There is mould on the walls.",
-    "V"
+    "b"
 )
 area_chambers.define_connections([area_great_hall])
 area_great_hall.define_connections([
