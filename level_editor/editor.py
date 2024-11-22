@@ -4,11 +4,15 @@ from cells import Cell
 
 # pygame setup
 pygame.init()
+pygame.font.init()
+my_font = pygame.font.SysFont("Comic Sans MS", 30)
 screen = pygame.display.set_mode((1280, 720))
 clock = pygame.time.Clock()
 running = True
 
 
+CELL_MOUSEOVER = False
+CELL_MOUSEOVER_DETAIL = None
 CELL_SELECTED = False
 GRID_COLUMNS_ROWS = 3
 scroll_x, scroll_y = 0, 0
@@ -23,7 +27,9 @@ def initialise():
 
     for row in range(GRID_COLUMNS_ROWS):
         for column in range(GRID_COLUMNS_ROWS):
-            cells.append(Cell(board, left_offset, top_offset, 40, 40))
+            cells.append(
+                Cell(board, left_offset, top_offset, 40, 40, f"{column}, {row}")
+            )
             left_offset += 50
         top_offset += 50
         left_offset -= 150
@@ -36,11 +42,13 @@ def render():
     screen.blit(board, (0, 0), (scroll_x, scroll_y, 1280, 720))
 
     if CELL_SELECTED:
-        pygame.draw.rect(screen, "green", pygame.Rect(50, 50, 50, 50))
+        pygame.draw.rect(screen, "green", pygame.Rect(950, 30, 300, 650))
 
     if CELL_MOUSEOVER:
-        pygame.draw.rect(screen, "green", pygame.Rect(200, 50, 50, 50))
+        # pygame.draw.rect(screen, "green", pygame.Rect(30, 630, 50, 50))
 
+        text_surface = my_font.render(CELL_MOUSEOVER_DETAIL, False, "Green", "Blue")
+        screen.blit(text_surface, (30, 630))
 
 
 initialise()
@@ -56,6 +64,7 @@ while running:
         cell.unset_mouseover()
         CELL_MOUSEOVER = False
         if cell.check_mouseover(displaced_mouse_position):
+            CELL_MOUSEOVER_DETAIL = cell.get_name()
             cell.set_mouseover()
             CELL_MOUSEOVER = True
             break
