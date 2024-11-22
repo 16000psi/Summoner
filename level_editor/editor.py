@@ -31,6 +31,8 @@ CELL_MOUSEOVER_DETAIL = None
 CELL_SELECT_DETAIL = None
 CELL_SELECTED = False
 GRID_COLUMNS_ROWS = 100
+MENU_MOUSEOVER = False
+
 scroll_x, scroll_y = 0, 0
 
 board = pygame.Surface((10000, 10000))
@@ -66,12 +68,22 @@ def initialise():
         left_offset -= 50 * GRID_COLUMNS_ROWS
 
 
+BUTTON_WIDTH, BUTTON_HEIGHT = 100, 50
+button_x = 30
+button_y = 30
+
+menu_button = my_font.render("menu", False, "black")
+text_rect = menu_button.get_rect(
+    center=(button_x + BUTTON_WIDTH // 2, button_y + BUTTON_HEIGHT // 2)
+)
+button_rect = pygame.Rect(button_x, button_y, BUTTON_WIDTH, BUTTON_HEIGHT)
+
+
 def render():
     for cell in cells:
         cell.draw()
 
     screen.blit(board, (0, 0), (scroll_x, scroll_y, 1280, 720))
-
     if CELL_SELECTED:
         pygame.draw.rect(screen, "green", pygame.Rect(950, 30, 300, 650))
         cell_title = my_font.render(CELL_SELECT_DETAIL, False, "Green", "Blue")
@@ -82,6 +94,16 @@ def render():
 
         coordinate_text = my_font.render(CELL_MOUSEOVER_DETAIL, False, "Green", "Blue")
         screen.blit(coordinate_text, (30, 630))
+
+    if MENU_MOUSEOVER:
+        button_color = "red"
+    else:
+        button_color = "blue"
+
+    pygame.draw.rect(
+        screen, button_color, (button_x, button_y, BUTTON_WIDTH, BUTTON_HEIGHT)
+    )
+    screen.blit(menu_button, text_rect)
 
 
 initialise()
@@ -102,11 +124,16 @@ while running:
             CELL_MOUSEOVER = True
             break
 
+    if button_rect.collidepoint(pygame.mouse.get_pos()):
+        MENU_MOUSEOVER = True
+    else:
+        MENU_MOUSEOVER = False
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONDOWN and not MENU_MOUSEOVER:
             for cell in cells:
                 cell.unselect()
                 CELL_SELECTED = False

@@ -38,14 +38,14 @@ class Cell:
 
     def get_colour(self):
         if self.content and self.selected_cell:
-            return "purple"
-        elif self.content and self.mouseover:
             return "red"
-        elif self.content:
+        elif self.content and self.mouseover:
             return "yellow"
+        elif self.content:
+            return "lightcoral"
         elif self.selected_cell:
-            return "green"
+            return "white"
         elif self.mouseover:
-            return "gray3"
+            return "gray50"
         else:
             return "gray14"
