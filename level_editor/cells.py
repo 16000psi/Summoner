@@ -2,7 +2,7 @@ import pygame
 
 
 class Cell:
-    def __init__(self, surface, left, top, width, height, name):
+    def __init__(self, surface, left, top, width, height, name, content=None):
         self.surface = surface
         self.left = left
         self.top = top
@@ -12,12 +12,11 @@ class Cell:
         self.selected_cell = False
         self.mouseover = False
         self.name = name
+        self.content = content
 
     def draw(self):
-        if self.selected_cell:
-            pygame.draw.rect(self.surface, "blue", self.rect)
-        else:
-            pygame.draw.rect(self.surface, "gray14", self.rect)
+        colour = self.get_colour()
+        pygame.draw.rect(self.surface, colour, self.rect)
 
     def check_mouseover(self, mouse_position):
         return self.rect.collidepoint(mouse_position)
@@ -30,9 +29,23 @@ class Cell:
 
     def unset_mouseover(self):
         self.mouseover = False
-        
+
     def set_mouseover(self):
         self.mouseover = True
 
     def get_name(self):
         return self.name
+
+    def get_colour(self):
+        if self.content and self.selected_cell:
+            return "purple"
+        elif self.content and self.mouseover:
+            return "red"
+        elif self.content:
+            return "yellow"
+        elif self.selected_cell:
+            return "green"
+        elif self.mouseover:
+            return "gray3"
+        else:
+            return "gray14"

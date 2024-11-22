@@ -1,7 +1,10 @@
 # Example file showing a basic pygame "game loop"
+import asyncio
+
 import pygame
 
 from database.db import initialise_tortoise
+from database.models import MapCell
 
 from .cells import Cell
 
@@ -14,6 +17,13 @@ my_font = pygame.font.SysFont("Comic Sans MS", 30)
 screen = pygame.display.set_mode((1280, 720))
 clock = pygame.time.Clock()
 running = True
+
+# Fetch all MapCell records
+
+
+async def get_map_cells():
+    cells = await MapCell.all()
+    return cells
 
 
 CELL_MOUSEOVER = False
@@ -28,14 +38,29 @@ cells = []
 
 
 def initialise():
+    map_cells = asyncio.run(get_map_cells())
+    map_cells_dict = {f"{map_cell.x}_{map_cell.y}": map_cell for map_cell in map_cells}
     left_offset = 200
     top_offset = 300
 
     for row in range(GRID_COLUMNS_ROWS):
         for column in range(GRID_COLUMNS_ROWS):
-            cells.append(
-                Cell(board, left_offset, top_offset, 40, 40, f"{column}, {row}")
-            )
+            if f"{column}_{row}" in map_cells_dict:
+                cells.append(
+                    Cell(
+                        board,
+                        left_offset,
+                        top_offset,
+                        40,
+                        40,
+                        f"{column}, {row}",
+                        map_cells_dict[f"{column}_{row}"],
+                    )
+                )
+            else:
+                cells.append(
+                    Cell(board, left_offset, top_offset, 40, 40, f"{column}, {row}")
+                )
             left_offset += 50
         top_offset += 50
         left_offset -= 50 * GRID_COLUMNS_ROWS

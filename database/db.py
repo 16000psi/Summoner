@@ -16,7 +16,7 @@ async def init():
 
     await Tortoise.generate_schemas()
 
-    cell = await MapCell.create(x=10, y=20, content="A mysterious object")
+    # cell = await MapCell.create(x=10, y=20, content="A mysterious object")
     # print(cell)
 
 
