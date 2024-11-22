@@ -1,6 +1,11 @@
 # Example file showing a basic pygame "game loop"
 import pygame
-from cells import Cell
+
+from database.db import initialise_tortoise
+
+from .cells import Cell
+
+initialise_tortoise()
 
 # pygame setup
 pygame.init()
@@ -15,10 +20,10 @@ CELL_MOUSEOVER = False
 CELL_MOUSEOVER_DETAIL = None
 CELL_SELECT_DETAIL = None
 CELL_SELECTED = False
-GRID_COLUMNS_ROWS = 3
+GRID_COLUMNS_ROWS = 100
 scroll_x, scroll_y = 0, 0
 
-board = pygame.Surface((1280, 720))
+board = pygame.Surface((10000, 10000))
 cells = []
 
 
@@ -33,7 +38,7 @@ def initialise():
             )
             left_offset += 50
         top_offset += 50
-        left_offset -= 150
+        left_offset -= 50 * GRID_COLUMNS_ROWS
 
 
 def render():

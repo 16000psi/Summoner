@@ -17,7 +17,7 @@ class Cell:
         if self.selected_cell:
             pygame.draw.rect(self.surface, "blue", self.rect)
         else:
-            pygame.draw.rect(self.surface, "yellow", self.rect)
+            pygame.draw.rect(self.surface, "gray14", self.rect)
 
     def check_mouseover(self, mouse_position):
         return self.rect.collidepoint(mouse_position)
