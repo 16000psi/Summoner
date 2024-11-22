@@ -13,6 +13,7 @@ running = True
 
 CELL_MOUSEOVER = False
 CELL_MOUSEOVER_DETAIL = None
+CELL_SELECT_DETAIL = None
 CELL_SELECTED = False
 GRID_COLUMNS_ROWS = 3
 scroll_x, scroll_y = 0, 0
@@ -43,12 +44,14 @@ def render():
 
     if CELL_SELECTED:
         pygame.draw.rect(screen, "green", pygame.Rect(950, 30, 300, 650))
+        cell_title = my_font.render(CELL_SELECT_DETAIL, False, "Green", "Blue")
+        screen.blit(cell_title, (970, 50))
 
     if CELL_MOUSEOVER:
         # pygame.draw.rect(screen, "green", pygame.Rect(30, 630, 50, 50))
 
-        text_surface = my_font.render(CELL_MOUSEOVER_DETAIL, False, "Green", "Blue")
-        screen.blit(text_surface, (30, 630))
+        coordinate_text = my_font.render(CELL_MOUSEOVER_DETAIL, False, "Green", "Blue")
+        screen.blit(coordinate_text, (30, 630))
 
 
 initialise()
@@ -81,6 +84,7 @@ while running:
                 if cell.check_mouseover(displaced_mouse_position):
                     cell.select()
                     CELL_SELECTED = True
+                    CELL_SELECT_DETAIL = cell.get_name()
                     break
 
     keys = pygame.key.get_pressed()
