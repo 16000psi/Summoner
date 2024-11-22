@@ -9,6 +9,7 @@ clock = pygame.time.Clock()
 running = True
 
 
+CELL_SELECTED = False
 GRID_COLUMNS_ROWS = 3
 scroll_x, scroll_y = 0, 0
 
@@ -34,6 +35,13 @@ def render():
 
     screen.blit(board, (0, 0), (scroll_x, scroll_y, 1280, 720))
 
+    if CELL_SELECTED:
+        pygame.draw.rect(screen, "green", pygame.Rect(50, 50, 50, 50))
+
+    if CELL_MOUSEOVER:
+        pygame.draw.rect(screen, "green", pygame.Rect(200, 50, 50, 50))
+
+
 
 initialise()
 
@@ -41,19 +49,29 @@ initialise()
 while running:
     # poll for events
     # pygame.QUIT event means the user clicked X to close your window
+    # Get mouse position
+    mouse_pos_x, mouse_pos_y = pygame.mouse.get_pos()
+    displaced_mouse_position = (mouse_pos_x + scroll_x, mouse_pos_y + scroll_y)
+    for cell in cells:
+        cell.unset_mouseover()
+        CELL_MOUSEOVER = False
+        if cell.check_mouseover(displaced_mouse_position):
+            cell.set_mouseover()
+            CELL_MOUSEOVER = True
+            break
+
     for event in pygame.event.get():
-        # if event.type == pygame.KEYDOWN and event.key:
-        # print(event.key)
         if event.type == pygame.QUIT:
             running = False
 
         if event.type == pygame.MOUSEBUTTONDOWN:
-            mouse_pos_x, mouse_pos_y = pygame.mouse.get_pos()
             for cell in cells:
                 cell.unselect()
+                CELL_SELECTED = False
             for cell in cells:
-                if cell.check_click((mouse_pos_x + scroll_x, mouse_pos_y + scroll_y)):
+                if cell.check_mouseover(displaced_mouse_position):
                     cell.select()
+                    CELL_SELECTED = True
                     break
 
     keys = pygame.key.get_pressed()

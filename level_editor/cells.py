@@ -10,6 +10,7 @@ class Cell:
         self.height = height
         self.rect = pygame.Rect(left, top, width, height)
         self.selected_cell = False
+        self.mouseover = False
 
     def draw(self):
         if self.selected_cell:
@@ -17,7 +18,7 @@ class Cell:
         else:
             pygame.draw.rect(self.surface, "yellow", self.rect)
 
-    def check_click(self, mouse_position):
+    def check_mouseover(self, mouse_position):
         return self.rect.collidepoint(mouse_position)
 
     def unselect(self):
@@ -25,3 +26,9 @@ class Cell:
 
     def select(self):
         self.selected_cell = True
+
+    def unset_mouseover(self):
+        self.mouseover = False
+        
+    def set_mouseover(self):
+        self.mouseover = True
