@@ -1,14 +1,12 @@
-# Example file showing a basic pygame "game loop"
 import asyncio
 
 import pygame
+import pygame_menu
 
 from database.db import initialise_tortoise
 from database.models import MapCell
 
 from .cells import Cell
-
-initialise_tortoise()
 
 # pygame setup
 pygame.init()
@@ -18,12 +16,10 @@ screen = pygame.display.set_mode((1280, 720))
 clock = pygame.time.Clock()
 running = True
 
-# Fetch all MapCell records
-
 
 async def get_map_cells():
-    cells = await MapCell.all()
-    return cells
+    map_cells = await MapCell.all()
+    return map_cells
 
 
 CELL_MOUSEOVER = False
@@ -38,8 +34,30 @@ scroll_x, scroll_y = 0, 0
 board = pygame.Surface((10000, 10000))
 cells = []
 
+file_menu = pygame_menu.Menu(
+    "Welcome",
+    400,
+    300,
+    theme=pygame_menu.themes.THEME_BLUE,
+    onclose=pygame_menu.events.BACK,
+)
 
-def initialise():
+
+def on_file_selected(selected_item, value, **kwargs):
+    initialise(value)
+
+
+file_menu.add.text_input("Name :", default="John Doe")
+items = [("a", "sqlite://maps/db.sqlite3"), ("b", "sqlite://maps/db_2.sqlite3"), ("c", "sqlite://maps/db_3.sqlite3")]
+file_menu.add.dropselect("File", items=items, onchange=on_file_selected)
+file_menu.disable()
+
+DB_URL = "sqlite://maps/db_2.sqlite3"
+
+
+def initialise(db_url=DB_URL):
+    cells.clear() 
+    initialise_tortoise(db_url)
     map_cells = asyncio.run(get_map_cells())
     map_cells_dict = {f"{map_cell.x}_{map_cell.y}": map_cell for map_cell in map_cells}
     left_offset = 200
@@ -129,11 +147,15 @@ while running:
     else:
         MENU_MOUSEOVER = False
 
-    for event in pygame.event.get():
+    events = pygame.event.get()
+    for event in events:
         if event.type == pygame.QUIT:
             running = False
 
-        if event.type == pygame.MOUSEBUTTONDOWN and not MENU_MOUSEOVER:
+        if event.type == pygame.MOUSEBUTTONDOWN and MENU_MOUSEOVER:
+            file_menu.enable()
+
+        elif event.type == pygame.MOUSEBUTTONDOWN and not MENU_MOUSEOVER:
             for cell in cells:
                 cell.unselect()
                 CELL_SELECTED = False
@@ -153,6 +175,9 @@ while running:
         scroll_y -= 5  # Move up
     if keys[pygame.K_DOWN]:
         scroll_y += 5  # Move down
+
+    if file_menu.is_enabled():
+        file_menu.mainloop(screen)
 
     # Prevent scrolling beyond the surface edges
     # scroll_x = max(0, min(scroll_x, board.get_width() - screen.get_width()))
