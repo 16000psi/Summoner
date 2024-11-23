@@ -7,6 +7,7 @@ from database.db import initialise_tortoise
 from database.models import MapCell
 
 from .cells import Cell
+from .menus import generate_file_menu
 
 # pygame setup
 pygame.init()
@@ -34,29 +35,12 @@ scroll_x, scroll_y = 0, 0
 board = pygame.Surface((10000, 10000))
 cells = []
 
-file_menu = pygame_menu.Menu(
-    "Welcome",
-    400,
-    300,
-    theme=pygame_menu.themes.THEME_BLUE,
-    onclose=pygame_menu.events.BACK,
-)
-
-
-def on_file_selected(selected_item, value, **kwargs):
-    initialise(value)
-
-
-file_menu.add.text_input("Name :", default="John Doe")
-items = [("a", "sqlite://maps/db.sqlite3"), ("b", "sqlite://maps/db_2.sqlite3"), ("c", "sqlite://maps/db_3.sqlite3")]
-file_menu.add.dropselect("File", items=items, onchange=on_file_selected)
-file_menu.disable()
 
 DB_URL = "sqlite://maps/db.sqlite3"
 
 
 def initialise(db_url=DB_URL):
-    cells.clear() 
+    cells.clear()
     initialise_tortoise(db_url)
     map_cells = asyncio.run(get_map_cells())
     map_cells_dict = {f"{map_cell.x}_{map_cell.y}": map_cell for map_cell in map_cells}
@@ -85,6 +69,8 @@ def initialise(db_url=DB_URL):
         top_offset += 50
         left_offset -= 50 * GRID_COLUMNS_ROWS
 
+
+file_menu = generate_file_menu(initialise)
 
 BUTTON_WIDTH, BUTTON_HEIGHT = 100, 50
 button_x = 30
