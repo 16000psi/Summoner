@@ -1,11 +1,11 @@
 import asyncio
 
 import pygame
-import pygame_menu
 
 from database.db import initialise_tortoise
 from database.models import MapCell
 
+from .buttons import Button
 from .cells import Cell
 from .menus import generate_file_menu
 
@@ -28,7 +28,6 @@ CELL_MOUSEOVER_DETAIL = None
 CELL_SELECT_DETAIL = None
 CELL_SELECTED = False
 GRID_COLUMNS_ROWS = 100
-MENU_MOUSEOVER = False
 
 scroll_x, scroll_y = 0, 0
 
@@ -72,15 +71,19 @@ def initialise(db_url=DB_URL):
 
 file_menu = generate_file_menu(initialise)
 
-BUTTON_WIDTH, BUTTON_HEIGHT = 100, 50
-button_x = 30
-button_y = 30
-
-menu_button = my_font.render("menu", False, "black")
-text_rect = menu_button.get_rect(
-    center=(button_x + BUTTON_WIDTH // 2, button_y + BUTTON_HEIGHT // 2)
+menu_button = Button(
+    surface=screen,
+    x=30,
+    y=30,
+    width=100,
+    height=50,
+    font=my_font,
+    text="menu",
+    text_color="black",
+    button_color="blue",
+    highlight_color="red",
+    onclick=file_menu.enable,
 )
-button_rect = pygame.Rect(button_x, button_y, BUTTON_WIDTH, BUTTON_HEIGHT)
 
 
 def render():
@@ -94,20 +97,10 @@ def render():
         screen.blit(cell_title, (970, 50))
 
     if CELL_MOUSEOVER:
-        # pygame.draw.rect(screen, "green", pygame.Rect(30, 630, 50, 50))
-
         coordinate_text = my_font.render(CELL_MOUSEOVER_DETAIL, False, "Green", "Blue")
         screen.blit(coordinate_text, (30, 630))
 
-    if MENU_MOUSEOVER:
-        button_color = "red"
-    else:
-        button_color = "blue"
-
-    pygame.draw.rect(
-        screen, button_color, (button_x, button_y, BUTTON_WIDTH, BUTTON_HEIGHT)
-    )
-    screen.blit(menu_button, text_rect)
+    menu_button.render_button()
 
 
 initialise()
@@ -128,20 +121,17 @@ while running:
             CELL_MOUSEOVER = True
             break
 
-    if button_rect.collidepoint(pygame.mouse.get_pos()):
-        MENU_MOUSEOVER = True
-    else:
-        MENU_MOUSEOVER = False
+    menu_button.mouseover_check((mouse_pos_x, mouse_pos_y))
 
     events = pygame.event.get()
     for event in events:
         if event.type == pygame.QUIT:
             running = False
 
-        if event.type == pygame.MOUSEBUTTONDOWN and MENU_MOUSEOVER:
-            file_menu.enable()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            menu_button.check_click()
 
-        elif event.type == pygame.MOUSEBUTTONDOWN and not MENU_MOUSEOVER:
+        elif event.type == pygame.MOUSEBUTTONDOWN and not menu_button.is_mouseover():
             for cell in cells:
                 cell.unselect()
                 CELL_SELECTED = False
@@ -165,10 +155,6 @@ while running:
     if file_menu.is_enabled():
         file_menu.mainloop(screen)
 
-    # Prevent scrolling beyond the surface edges
-    # scroll_x = max(0, min(scroll_x, board.get_width() - screen.get_width()))
-    # scroll_y = max(0, min(scroll_y, board.get_height() - screen.get_height()))
-
     # fill the screen with a color to wipe away anything from last frame
     screen.fill("black")
 
@@ -176,9 +162,7 @@ while running:
 
     render()
 
-    # flip() the display to put your work on screen
     pygame.display.flip()
-
-    clock.tick(60)  # limits FPS to 60
+    clock.tick(60)
 
 pygame.quit()
