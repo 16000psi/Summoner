@@ -52,7 +52,7 @@ items = [("a", "sqlite://maps/db.sqlite3"), ("b", "sqlite://maps/db_2.sqlite3"),
 file_menu.add.dropselect("File", items=items, onchange=on_file_selected)
 file_menu.disable()
 
-DB_URL = "sqlite://maps/db_2.sqlite3"
+DB_URL = "sqlite://maps/db.sqlite3"
 
 
 def initialise(db_url=DB_URL):
