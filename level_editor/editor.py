@@ -128,7 +128,7 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONDOWN and menu_button.is_mouseover():
             menu_button.check_click()
 
         elif event.type == pygame.MOUSEBUTTONDOWN and not menu_button.is_mouseover():
