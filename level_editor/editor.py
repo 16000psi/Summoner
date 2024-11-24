@@ -17,12 +17,6 @@ screen = pygame.display.set_mode((1280, 720))
 clock = pygame.time.Clock()
 running = True
 
-
-async def get_map_cells():
-    map_cells = await MapCell.all()
-    return map_cells
-
-
 CELL_MOUSEOVER = False
 CELL_MOUSEOVER_DETAIL = None
 CELL_SELECT_DETAIL = None
@@ -41,8 +35,7 @@ DB_URL = "sqlite://maps/db.sqlite3"
 def initialise(db_url=DB_URL):
     cells.clear()
     initialise_tortoise(db_url)
-    map_cells = asyncio.run(get_map_cells())
-    map_cells_dict = {f"{map_cell.x}_{map_cell.y}": map_cell for map_cell in map_cells}
+    map_cells_dict = asyncio.run(MapCell.get_map_cells_dict())
     left_offset = 200
     top_offset = 300
 
