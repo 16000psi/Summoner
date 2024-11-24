@@ -6,7 +6,7 @@ from database.db import initialise_tortoise
 from database.models import MapCell
 
 from .buttons import Button
-from .cells import Cell
+from .grid import Grid
 from .menus import generate_file_menu
 
 # pygame setup
@@ -26,40 +26,21 @@ GRID_COLUMNS_ROWS = 100
 scroll_x, scroll_y = 0, 0
 
 board = pygame.Surface((10000, 10000))
-cells = []
+grid = None
 
 
 DB_URL = "sqlite://maps/db.sqlite3"
 
 
 def initialise(db_url=DB_URL):
-    cells.clear()
+    global grid
+    if grid:
+        grid.clear_cells()
     initialise_tortoise(db_url)
     map_cells_dict = asyncio.run(MapCell.get_map_cells_dict())
-    left_offset = 200
-    top_offset = 300
+    grid = Grid(board, 100, 200, 300, map_cells_dict)
 
-    for row in range(GRID_COLUMNS_ROWS):
-        for column in range(GRID_COLUMNS_ROWS):
-            if f"{column}_{row}" in map_cells_dict:
-                cells.append(
-                    Cell(
-                        board,
-                        left_offset,
-                        top_offset,
-                        40,
-                        40,
-                        f"{column}, {row}",
-                        map_cells_dict[f"{column}_{row}"],
-                    )
-                )
-            else:
-                cells.append(
-                    Cell(board, left_offset, top_offset, 40, 40, f"{column}, {row}")
-                )
-            left_offset += 50
-        top_offset += 50
-        left_offset -= 50 * GRID_COLUMNS_ROWS
+    grid.create_grid()
 
 
 file_menu = generate_file_menu(initialise)
@@ -80,7 +61,7 @@ menu_button = Button(
 
 
 def render():
-    for cell in cells:
+    for cell in grid.get_cells():
         cell.draw()
 
     screen.blit(board, (0, 0), (scroll_x, scroll_y, 1280, 720))
@@ -105,7 +86,7 @@ while running:
     # Get mouse position
     mouse_pos_x, mouse_pos_y = pygame.mouse.get_pos()
     displaced_mouse_position = (mouse_pos_x + scroll_x, mouse_pos_y + scroll_y)
-    for cell in cells:
+    for cell in grid.get_cells():
         cell.unset_mouseover()
         CELL_MOUSEOVER = False
         if cell.check_mouseover(displaced_mouse_position):
@@ -125,10 +106,10 @@ while running:
             menu_button.check_click()
 
         elif event.type == pygame.MOUSEBUTTONDOWN and not menu_button.is_mouseover():
-            for cell in cells:
+            for cell in grid.get_cells():
                 cell.unselect()
                 CELL_SELECTED = False
-            for cell in cells:
+            for cell in grid.get_cells():
                 if cell.check_mouseover(displaced_mouse_position):
                     cell.select()
                     CELL_SELECTED = True
