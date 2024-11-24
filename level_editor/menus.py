@@ -1,5 +1,7 @@
 import pygame_menu
 
+from database.utils import list_sqlite3_files_in_maps
+
 
 def generate_file_menu(callback):
     """
@@ -29,11 +31,8 @@ def generate_file_menu(callback):
         callback(value)
 
     file_menu.add.text_input("Name :", default="John Doe")
-    items = [
-        ("a", "sqlite://maps/db.sqlite3"),
-        ("b", "sqlite://maps/db_2.sqlite3"),
-        ("c", "sqlite://maps/db_3.sqlite3"),
-    ]
+    files = list_sqlite3_files_in_maps()
+    items = [(file, f"sqlite://maps/{file}.sqlite3") for file in files]
     file_menu.add.dropselect("File", items=items, onchange=on_file_selected)
     file_menu.disable()
 
