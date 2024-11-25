@@ -1,6 +1,50 @@
 import pygame
 
 
+class TextOverlay:
+    def __init__(
+        self,
+        surface,
+        x,
+        y,
+        width,
+        height,
+        font,
+        text_color,
+        background_color,
+        text=None,
+    ):
+        self.surface = surface
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.font = font
+        self.text = text
+        self.text_color = text_color
+        self.background_color = background_color
+        pass
+
+    def set_text(self, string):
+        self.text = string
+
+    def get_text(self):
+        return self.text
+
+    def draw_overlay(self):
+        pygame.draw.rect(
+            self.surface, "green", pygame.Rect(self.x, self.y, self.width, self.height)
+        )
+        text = self.font.render(
+            self.get_text(), False, self.text_color, self.background_color
+        )
+        self.surface.blit(text, (self.x, self.y))
+
+    def draw_with_text(self, string):
+        self.set_text(string)
+        self.draw_overlay()
+
+
 class Button:
     def __init__(
         self,

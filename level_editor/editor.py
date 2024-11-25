@@ -5,9 +5,9 @@ import pygame
 from database.db import initialise_tortoise
 from database.models import MapCell
 
-from .buttons import Button
 from .grid import Grid
 from .menus import generate_file_menu
+from .ui import Button, TextOverlay
 
 pygame.init()
 pygame.font.init()
@@ -60,6 +60,28 @@ menu_button = Button(
     onclick=file_menu.enable,
 )
 
+selected_cell_overlay = TextOverlay(
+    surface=screen,
+    x=950,
+    y=30,
+    width=300,
+    height=720,
+    font=my_font,
+    text_color="green",
+    background_color="blue",
+)
+
+coordinate_text_overlay = TextOverlay(
+    surface=screen,
+    x=30,
+    y=630,
+    width=0,
+    height=0,
+    font=my_font,
+    text_color="green",
+    background_color="blue",
+)
+
 
 def render():
     for cell in grid.get_cells():
@@ -68,17 +90,10 @@ def render():
     screen.blit(board, (0, 0), (scroll_x, scroll_y, 1280, 720))
 
     if grid.is_cell_selected():
-        pygame.draw.rect(screen, "green", pygame.Rect(950, 30, 300, 650))
-        cell_title = my_font.render(
-            grid.get_cell_selected_detail(), False, "Green", "Blue"
-        )
-        screen.blit(cell_title, (970, 50))
+        selected_cell_overlay.draw_with_text(grid.get_cell_selected_detail())
 
     if grid.is_cell_mouseover():
-        coordinate_text = my_font.render(
-            grid.get_mouseover_detail(), False, "Green", "Blue"
-        )
-        screen.blit(coordinate_text, (30, 630))
+        coordinate_text_overlay.draw_with_text(grid.get_mouseover_detail())
 
     menu_button.render_button()
 
