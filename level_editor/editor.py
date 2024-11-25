@@ -4,6 +4,7 @@ import pygame
 
 from database.db import initialise_tortoise
 from database.models import MapCell
+from database.utils import initialise_buffer_file
 
 from .grid import Grid
 from .menus import FileMenu
@@ -24,14 +25,14 @@ board = pygame.Surface((10000, 10000))
 grid = None
 
 
-DB_URL = "sqlite://maps/db.sqlite3"
+DB_URL = "sqlite://maps/buffers/buffer.sqlite3"
 
 
-def initialise(db_url=DB_URL):
+def initialise():
     global grid
     if grid:
         grid.clear_cells()
-    initialise_tortoise(db_url)
+    initialise_tortoise()
     map_cells_dict = asyncio.run(MapCell.get_map_cells_dict())
     grid = Grid(
         surface=board,

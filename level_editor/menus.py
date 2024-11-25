@@ -1,6 +1,10 @@
 import pygame_menu
 
-from database.utils import create_new_sqlite3_file_in_maps, list_sqlite3_files_in_maps
+from database.utils import (
+    copy_buffer_file_to_new_file_in_maps,
+    copy_file_to_buffer_file,
+    list_sqlite3_files_in_maps,
+)
 
 
 class FileMenu:
@@ -54,13 +58,14 @@ class FileMenu:
         self.disable()
 
     def handle_load(self):
-        self.initiation_callback(self.load_target)
+        copy_file_to_buffer_file(self.load_target)
+        self.initiation_callback()
         self.load_menu.disable()
         self.disable()
 
     def handle_save(self):
         file_name = self.file_name_input.get_value()
-        create_new_sqlite3_file_in_maps(file_name)
+        copy_buffer_file_to_new_file_in_maps(file_name)
         self.set_available_files()
         self.file_dropdown.update_items(self.get_available_files())
         self.save_menu.disable()
@@ -83,7 +88,7 @@ class FileMenu:
         return self.available_files
 
     def on_file_selected(self, selected_item, value, **kwargs):
-        self.load_target = value
+        self.load_target = selected_item[0][0]
 
     def enable(self):
         return self.file_menu.enable()
