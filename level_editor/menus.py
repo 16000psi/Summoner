@@ -16,14 +16,22 @@ class FileMenu:
             theme=pygame_menu.themes.THEME_DARK,
             onclose=pygame_menu.events.BACK,
         )
-        self.file_name_label = self.file_menu.add.label(title="New file name:")
-        self.file_name_input = self.file_menu.add.text_input(
+
+        self.save_menu_button = self.file_menu.add.button("SAVE", self.open_save_menu)
+        self.save_menu = pygame_menu.Menu(
+            "File / Map operations menu",
+            1280,
+            720,
+            theme=pygame_menu.themes.THEME_DARK,
+            onclose=pygame_menu.events.BACK,
+        )
+        self.file_name_label = self.save_menu.add.label(title="Save as file name:")
+        self.file_name_input = self.save_menu.add.text_input(
             title="", textinput_id="file_name_input", default=""
         )
+        self.save_button = self.save_menu.add.button("Save...", self.handle_save)
 
-        self.new_map_button = self.file_menu.add.button(
-            "Create new map", self.handle_file_creation
-        )
+        self.save_menu.disable()
 
         self.load_menu_button = self.file_menu.add.button("LOAD", self.open_load_menu)
         self.load_menu = pygame_menu.Menu(
@@ -50,9 +58,21 @@ class FileMenu:
         self.load_menu.disable()
         self.disable()
 
+    def handle_save(self):
+        file_name = self.file_name_input.get_value()
+        create_new_sqlite3_file_in_maps(file_name)
+        self.set_available_files()
+        self.file_dropdown.update_items(self.get_available_files())
+        self.save_menu.disable()
+        self.disable()
+
     def open_load_menu(self):
         self.load_menu.enable()
         self.load_menu.mainloop(self.surface)
+
+    def open_save_menu(self):
+        self.save_menu.enable()
+        self.save_menu.mainloop(self.surface)
 
     def set_available_files(self):
         files = list_sqlite3_files_in_maps()
@@ -61,14 +81,6 @@ class FileMenu:
 
     def get_available_files(self):
         return self.available_files
-
-    def handle_file_creation(self):
-        file_name = self.file_menu.get_widget("file_name_input").get_value()
-        create_new_sqlite3_file_in_maps(file_name)
-        self.set_available_files()
-        self.file_dropdown.update_items(self.get_available_files())
-        self.file_menu.render()
-        self.disable()
 
     def on_file_selected(self, selected_item, value, **kwargs):
         self.load_target = value
