@@ -6,7 +6,7 @@ from database.db import initialise_tortoise
 from database.models import MapCell
 
 from .grid import Grid
-from .menus import generate_file_menu
+from .menus import FileMenu
 from .ui import Button, TextOverlay
 
 pygame.init()
@@ -44,7 +44,7 @@ def initialise(db_url=DB_URL):
     grid.create_grid()
 
 
-file_menu = generate_file_menu(initialise)
+file_menu = FileMenu(screen, initialise)
 
 menu_button = Button(
     surface=screen,
@@ -130,7 +130,7 @@ while running:
         scroll_y += 5
 
     if file_menu.is_enabled():
-        file_menu.mainloop(screen)
+        file_menu.mainloop()
 
     screen.fill("black")
     render()
