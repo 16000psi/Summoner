@@ -52,23 +52,20 @@ class Grid:
     def clear_cells(self):
         self.cells.clear()
 
-    def set_cell_mouseover(self):
-        self.cell_mouseover = True
-
-    def unset_cell_mouseover(self):
-        self.cell_mouseover = False
+    def set_cell_mouseover(self, boolean):
+        self.cell_mouseover = boolean
 
     def is_cell_mouseover(self):
         return self.cell_mouseover
 
     def handle_mouseover(self, mouse_position):
         for cell in self.get_cells():
-            cell.unset_mouseover()
-            self.unset_cell_mouseover()
+            cell.set_mouseover(False)
+            self.set_cell_mouseover(False)
             if cell.check_mouseover(mouse_position):
                 self.set_mouseover_detail(cell.get_name())
-                cell.set_mouseover()
-                self.set_cell_mouseover()
+                cell.set_mouseover(True)
+                self.set_cell_mouseover(True)
                 break
 
     def set_mouseover_detail(self, string):

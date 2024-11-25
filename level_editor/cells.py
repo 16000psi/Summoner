@@ -27,11 +27,8 @@ class Cell:
     def select(self):
         self.selected_cell = True
 
-    def unset_mouseover(self):
-        self.mouseover = False
-
-    def set_mouseover(self):
-        self.mouseover = True
+    def set_mouseover(self, boolean):
+        self.mouseover = boolean
 
     def get_name(self):
         return self.name

@@ -48,11 +48,8 @@ class Button:
         )
         self.surface.blit(text, text_rect)
 
-    def set_mouseover(self):
-        self.mouseover = True
-
-    def unset_mouseover(self):
-        self.mouseover = False
+    def set_mouseover(self, boolean):
+        self.mouseover = boolean
 
     def get_color(self):
         if self.mouseover:
@@ -65,9 +62,9 @@ class Button:
 
     def mouseover_check(self, mouse_position):
         if self.bounding_box.collidepoint(mouse_position):
-            self.set_mouseover()
+            self.set_mouseover(True)
         else:
-            self.unset_mouseover()
+            self.set_mouseover(False)
 
     def handle_click(self):
         self.on_click(*self.args, **self.kwargs)
