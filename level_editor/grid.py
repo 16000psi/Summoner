@@ -11,6 +11,10 @@ class Grid:
         self.left_offset = left_offset
         self.top_offset = top_offset
         self.cells = []
+        self.cell_mouseover = False
+        self.cell_mouseover_detail = None
+        self.cell_selected = False
+        self.cell_select_detail = None
 
     def create_grid(self):
         for row in range(self.side_size):
@@ -47,3 +51,51 @@ class Grid:
 
     def clear_cells(self):
         self.cells.clear()
+
+    def set_cell_mouseover(self):
+        self.cell_mouseover = True
+
+    def unset_cell_mouseover(self):
+        self.cell_mouseover = False
+
+    def is_cell_mouseover(self):
+        return self.cell_mouseover
+
+    def handle_mouseover(self, mouse_position):
+        for cell in self.get_cells():
+            cell.unset_mouseover()
+            self.unset_cell_mouseover()
+            if cell.check_mouseover(mouse_position):
+                self.set_mouseover_detail(cell.get_name())
+                cell.set_mouseover()
+                self.set_cell_mouseover()
+                break
+
+    def set_mouseover_detail(self, string):
+        self.cell_mouseover_detail = string
+
+    def get_mouseover_detail(self):
+        return self.cell_mouseover_detail
+
+    def set_cell_selected(self, boolean):
+        self.cell_selected = boolean
+
+    def is_cell_selected(self):
+        return self.cell_selected
+
+    def set_cell_selected_detail(self, string):
+        self.cell_selected_detail = string
+
+    def get_cell_selected_detail(self):
+        return self.cell_selected_detail
+
+    def handle_possible_cell_click(self, mouse_position):
+        for cell in self.get_cells():
+            cell.unselect()
+            self.set_cell_selected(False)
+        for cell in self.get_cells():
+            if cell.check_mouseover(mouse_position):
+                cell.select()
+                self.set_cell_selected(True)
+                self.set_cell_selected_detail(cell.get_name())
+                break

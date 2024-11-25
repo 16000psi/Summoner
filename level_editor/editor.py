@@ -9,7 +9,6 @@ from .buttons import Button
 from .grid import Grid
 from .menus import generate_file_menu
 
-# pygame setup
 pygame.init()
 pygame.font.init()
 my_font = pygame.font.SysFont("Comic Sans MS", 30)
@@ -17,15 +16,11 @@ screen = pygame.display.set_mode((1280, 720))
 clock = pygame.time.Clock()
 running = True
 
-CELL_MOUSEOVER = False
-CELL_MOUSEOVER_DETAIL = None
-CELL_SELECT_DETAIL = None
-CELL_SELECTED = False
-GRID_COLUMNS_ROWS = 100
 
 scroll_x, scroll_y = 0, 0
 
 board = pygame.Surface((10000, 10000))
+
 grid = None
 
 
@@ -38,7 +33,13 @@ def initialise(db_url=DB_URL):
         grid.clear_cells()
     initialise_tortoise(db_url)
     map_cells_dict = asyncio.run(MapCell.get_map_cells_dict())
-    grid = Grid(board, 100, 200, 300, map_cells_dict)
+    grid = Grid(
+        surface=board,
+        side_size=100,
+        left_offset=200,
+        top_offset=300,
+        map_cells_dict=map_cells_dict,
+    )
 
     grid.create_grid()
 
@@ -65,13 +66,18 @@ def render():
         cell.draw()
 
     screen.blit(board, (0, 0), (scroll_x, scroll_y, 1280, 720))
-    if CELL_SELECTED:
+
+    if grid.is_cell_selected():
         pygame.draw.rect(screen, "green", pygame.Rect(950, 30, 300, 650))
-        cell_title = my_font.render(CELL_SELECT_DETAIL, False, "Green", "Blue")
+        cell_title = my_font.render(
+            grid.get_cell_selected_detail(), False, "Green", "Blue"
+        )
         screen.blit(cell_title, (970, 50))
 
-    if CELL_MOUSEOVER:
-        coordinate_text = my_font.render(CELL_MOUSEOVER_DETAIL, False, "Green", "Blue")
+    if grid.is_cell_mouseover():
+        coordinate_text = my_font.render(
+            grid.get_mouseover_detail(), False, "Green", "Blue"
+        )
         screen.blit(coordinate_text, (30, 630))
 
     menu_button.render_button()
@@ -81,19 +87,9 @@ initialise()
 
 
 while running:
-    # poll for events
-    # pygame.QUIT event means the user clicked X to close your window
-    # Get mouse position
     mouse_pos_x, mouse_pos_y = pygame.mouse.get_pos()
     displaced_mouse_position = (mouse_pos_x + scroll_x, mouse_pos_y + scroll_y)
-    for cell in grid.get_cells():
-        cell.unset_mouseover()
-        CELL_MOUSEOVER = False
-        if cell.check_mouseover(displaced_mouse_position):
-            CELL_MOUSEOVER_DETAIL = cell.get_name()
-            cell.set_mouseover()
-            CELL_MOUSEOVER = True
-            break
+    grid.handle_mouseover(displaced_mouse_position)
 
     menu_button.mouseover_check((mouse_pos_x, mouse_pos_y))
 
@@ -106,36 +102,23 @@ while running:
             menu_button.check_click()
 
         elif event.type == pygame.MOUSEBUTTONDOWN and not menu_button.is_mouseover():
-            for cell in grid.get_cells():
-                cell.unselect()
-                CELL_SELECTED = False
-            for cell in grid.get_cells():
-                if cell.check_mouseover(displaced_mouse_position):
-                    cell.select()
-                    CELL_SELECTED = True
-                    CELL_SELECT_DETAIL = cell.get_name()
-                    break
+            grid.handle_possible_cell_click(displaced_mouse_position)
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_LEFT]:
-        scroll_x -= 5  # Move left
+        scroll_x -= 5
     if keys[pygame.K_RIGHT]:
-        scroll_x += 5  # Move right
+        scroll_x += 5
     if keys[pygame.K_UP]:
-        scroll_y -= 5  # Move up
+        scroll_y -= 5
     if keys[pygame.K_DOWN]:
-        scroll_y += 5  # Move down
+        scroll_y += 5
 
     if file_menu.is_enabled():
         file_menu.mainloop(screen)
 
-    # fill the screen with a color to wipe away anything from last frame
     screen.fill("black")
-
-    # RENDER YOUR GAME HERE
-
     render()
-
     pygame.display.flip()
     clock.tick(60)
 
