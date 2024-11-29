@@ -3,10 +3,17 @@ from .cells import Cell
 
 class Grid:
     def __init__(
-        self, surface, side_size, left_offset, top_offset, map_cells_dict=None
+        self,
+        surface,
+        side_size,
+        left_offset,
+        top_offset,
+        cell_menu,
+        map_cells_dict=None,
     ):
         self.surface = surface
         self.side_size = side_size
+        self.cell_menu = cell_menu
         self.map_cells_dict = map_cells_dict
         self.left_offset = left_offset
         self.top_offset = top_offset
@@ -92,6 +99,8 @@ class Grid:
             self.set_cell_selected(False)
         for cell in self.get_cells():
             if cell.check_mouseover(mouse_position):
+                self.cell_menu.set_cell(cell)
+                self.cell_menu.enable()
                 cell.select()
                 self.set_cell_selected(True)
                 self.set_cell_selected_detail(cell.get_name())

@@ -7,7 +7,7 @@ from database.models import MapCell
 from database.utils import initialise_buffer_file
 
 from .grid import Grid
-from .menus import FileMenu
+from .menus import CellMenu, FileMenu
 from .ui import Button, TextOverlay
 
 pygame.init()
@@ -27,6 +27,8 @@ grid = None
 
 DB_URL = "sqlite://maps/buffers/buffer.sqlite3"
 
+cell_menu = CellMenu(screen)
+
 
 def initialise():
     global grid
@@ -40,12 +42,14 @@ def initialise():
         left_offset=200,
         top_offset=300,
         map_cells_dict=map_cells_dict,
+        cell_menu=cell_menu,
     )
 
     grid.create_grid()
 
 
 file_menu = FileMenu(screen, initialise)
+
 
 menu_button = Button(
     surface=screen,
@@ -90,8 +94,8 @@ def render():
 
     screen.blit(board, (0, 0), (scroll_x, scroll_y, 1280, 720))
 
-    if grid.is_cell_selected():
-        selected_cell_overlay.draw_with_text(grid.get_cell_selected_detail())
+    # if grid.is_cell_selected():
+    #     selected_cell_overlay.draw_with_text(grid.get_cell_selected_detail())
 
     if grid.is_cell_mouseover():
         coordinate_text_overlay.draw_with_text(grid.get_mouseover_detail())
@@ -132,6 +136,9 @@ while running:
 
     if file_menu.is_enabled():
         file_menu.mainloop()
+
+    if cell_menu.is_enabled():
+        cell_menu.mainloop()
 
     screen.fill("black")
     render()

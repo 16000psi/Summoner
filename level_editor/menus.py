@@ -112,3 +112,35 @@ class FileMenu:
 
     def generate(self):
         return self.file_menu
+
+
+class CellMenu:
+    def __init__(self, surface):
+        self.surface = surface
+        self.cell = None
+        self.menu = pygame_menu.Menu(
+            "Cell Menu",
+            120,
+            120,
+            theme=pygame_menu.themes.THEME_DARK,
+            onclose=pygame_menu.events.BACK,
+        )
+        self.menu.disable()
+
+    def set_cell(self, cell):
+        self.cell = cell
+
+    def enable(self):
+        return self.menu.enable()
+
+    def disable(self):
+        return self.menu.disable()
+
+    def is_enabled(self):
+        return self.menu.is_enabled()
+
+    def mainloop(self):
+        return self.menu.mainloop(self.surface)
+
+    def generate(self):
+        return self.menu
