@@ -3,16 +3,17 @@ import pygame_menu
 from database.utils import (
     copy_buffer_file_to_new_file_in_maps,
     copy_file_to_buffer_file,
+    initialise_buffer_file,
     list_sqlite3_files_in_maps,
 )
 
 
 class FileMenu:
-    def __init__(self, surface, initiation_callback):
+    def __init__(self, surface, initialisation_callback):
         self.surface = surface
         self.available_files = None
         self.set_available_files()
-        self.initiation_callback = initiation_callback
+        self.initialisation_callback = initialisation_callback
         self.file_menu = pygame_menu.Menu(
             "File / Map operations menu",
             1280,
@@ -20,6 +21,8 @@ class FileMenu:
             theme=pygame_menu.themes.THEME_DARK,
             onclose=pygame_menu.events.BACK,
         )
+
+        self.new_map_button = self.file_menu.add.button("NEW", self.handle_new_map)
 
         self.save_menu_button = self.file_menu.add.button("SAVE", self.open_save_menu)
         self.save_menu = pygame_menu.Menu(
@@ -57,9 +60,14 @@ class FileMenu:
 
         self.disable()
 
+    def handle_new_map(self):
+        initialise_buffer_file()
+        self.initialisation_callback()
+        self.disable()
+
     def handle_load(self):
         copy_file_to_buffer_file(self.load_target)
-        self.initiation_callback()
+        self.initialisation_callback()
         self.load_menu.disable()
         self.disable()
 
